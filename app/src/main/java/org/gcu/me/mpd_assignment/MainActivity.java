@@ -4,6 +4,10 @@ import android.os.Bundle;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
+import org.gcu.me.mpd_assignment.models.georss.Coordinates;
+import org.gcu.me.mpd_assignment.models.georss.Point;
+import org.gcu.me.mpd_assignment.models.georss.Polygon;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
