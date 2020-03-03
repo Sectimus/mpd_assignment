@@ -1,6 +1,22 @@
 package org.gcu.me.mpd_assignment.models;
 
+import android.os.AsyncTask;
+import android.util.Log;
+
 import org.gcu.me.mpd_assignment.models.georss.Coordinates;
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlPullParserFactory;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.StringReader;
+import java.net.URL;
+import java.net.URLConnection;
+import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
 
 public abstract class Traffic {
     private String title;
@@ -8,7 +24,68 @@ public abstract class Traffic {
     private String link;
     private Coordinates location;
     private String author;
-    private String comments;
-    private String pubDate;
+    private List<String> comments;
+    private Date pubDate;
+
+    //asynctasks are always to be used over manual threads in android applications
+    public static class LoaderTask extends AsyncTask<String, Double, String>{
+        public interface TaskListener {
+            void onFinished(String result);
+            void onStatusUpdate(Double progress);
+        }
+
+        private final TaskListener taskListener;
+
+        public LoaderTask(TaskListener listener) {
+            // The listener reference is passed in through the constructor
+            this.taskListener = listener;
+        }
+
+        @Override
+        protected String doInBackground(String... urls) {
+            String url = urls[0];
+            URLConnection yc;
+            BufferedReader in = null;
+            String inputLine = "";
+
+            Log.e("MyTag","in run");
+            String result="";
+            try
+            {
+                Log.e("MyTag","in try");
+                URL aurl = new URL(url);
+                yc = aurl.openConnection();
+                //int contentLength = yc.getContentLength();
+                in = new BufferedReader(new InputStreamReader(yc.getInputStream()));
+                //
+                // Throw away the first 2 header lines before parsing
+                //
+                //
+                //
+                while ((inputLine = in.readLine()) != null)
+                {
+                    result = result + inputLine;
+                }
+                in.close();
+            }
+            catch (IOException ae)
+            {
+                Log.e("MyTag", "ioexception");
+            }
+            return result;
+        }
+
+        @Override
+        protected void onProgressUpdate(Double... progress){
+            this.taskListener.onStatusUpdate(progress[0]);
+        }
+
+        @Override
+        protected void onPostExecute(String result){
+            if(this.taskListener != null) {
+                this.taskListener.onFinished(result);
+            }
+        }
+    }
 
 }

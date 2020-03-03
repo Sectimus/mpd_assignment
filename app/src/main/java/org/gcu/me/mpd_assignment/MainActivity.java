@@ -1,9 +1,12 @@
 package org.gcu.me.mpd_assignment;
 
+import android.os.AsyncTask;
 import android.os.Bundle;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
+import org.gcu.me.mpd_assignment.models.Roadworks;
+import org.gcu.me.mpd_assignment.models.Traffic;
 import org.gcu.me.mpd_assignment.models.georss.Coordinates;
 import org.gcu.me.mpd_assignment.models.georss.Point;
 import org.gcu.me.mpd_assignment.models.georss.Polygon;
@@ -29,6 +32,18 @@ public class MainActivity extends AppCompatActivity {
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
         NavigationUI.setupWithNavController(navView, navController);
+
+        Roadworks.load(new Traffic.LoaderTask.TaskListener() {
+            @Override
+            public void onFinished(String result) {
+                System.out.println("YURIKA "+result);
+            }
+
+            @Override
+            public void onStatusUpdate(Double progress) {
+
+            }
+        });
     }
 
 }
