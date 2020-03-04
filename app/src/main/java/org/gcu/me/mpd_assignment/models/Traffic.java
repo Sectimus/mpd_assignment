@@ -4,18 +4,13 @@ import android.os.AsyncTask;
 import android.util.Log;
 
 import org.gcu.me.mpd_assignment.models.georss.Coordinates;
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlPullParserFactory;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.StringReader;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Date;
-import java.util.LinkedList;
 import java.util.List;
 
 public abstract class Traffic {
@@ -28,7 +23,7 @@ public abstract class Traffic {
     private Date pubDate;
 
     //asynctasks are always to be used over manual threads in android applications
-    public static class LoaderTask extends AsyncTask<String, Double, String>{
+    public static class LoaderTask extends AsyncTask<String, Double, String> {
         public interface TaskListener {
             void onFinished(String result);
             void onStatusUpdate(Double progress);
@@ -62,8 +57,23 @@ public abstract class Traffic {
                 //
                 //
                 //
+                int readBytes = 0;
+                int contentLength = yc.getContentLength();
                 while ((inputLine = in.readLine()) != null)
                 {
+                    //setup for progress
+                    readBytes += inputLine.getBytes("ISO-8859-2").length+2;
+
+                    if (contentLength != -1) {
+                        //calculate the progress percentage and publish
+                        double progress = (Double.valueOf(readBytes)/Double.valueOf(contentLength+2))*Double.valueOf(100);
+                        publishProgress(progress);
+                    } else {
+                        //unknown progress = -1
+                        publishProgress(Double.valueOf(-1));
+                    }
+
+
                     result = result + inputLine;
                 }
                 in.close();

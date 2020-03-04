@@ -1,15 +1,11 @@
 package org.gcu.me.mpd_assignment;
 
-import android.os.AsyncTask;
 import android.os.Bundle;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import org.gcu.me.mpd_assignment.models.Roadworks;
 import org.gcu.me.mpd_assignment.models.Traffic;
-import org.gcu.me.mpd_assignment.models.georss.Coordinates;
-import org.gcu.me.mpd_assignment.models.georss.Point;
-import org.gcu.me.mpd_assignment.models.georss.Polygon;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.navigation.NavController;
@@ -41,7 +37,7 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onStatusUpdate(Double progress) {
-
+                System.out.println(progress);
             }
         });
     }
