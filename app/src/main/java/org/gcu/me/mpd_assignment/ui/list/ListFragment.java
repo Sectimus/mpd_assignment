@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
@@ -23,11 +24,12 @@ public class ListFragment extends Fragment {
         listViewModel =
                 ViewModelProviders.of(this).get(ListViewModel.class);
         View root = inflater.inflate(R.layout.fragment_list, container, false);
-        final TextView textView = root.findViewById(R.id.text_notifications);
-        listViewModel.getText().observe(this, new Observer<String>() {
+        final ProgressBar progressBar = root.findViewById(R.id.prog_repoLoader);
+
+       listViewModel.getProgress().observe(this, new Observer<Double>() {
             @Override
-            public void onChanged(@Nullable String s) {
-                textView.setText(s);
+            public void onChanged(Double progress) {
+                progressBar.setProgress((int)Math.round(progress));
             }
         });
         return root;

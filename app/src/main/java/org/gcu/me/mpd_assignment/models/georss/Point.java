@@ -4,8 +4,8 @@ import java.util.Objects;
 
 public class Point implements Coordinates {
     //attributes
-    private Long lat;
-    private Long lon;
+    private Double lat;
+    private Double lon;
 
     //default constructor
     public Point(){
@@ -13,19 +13,19 @@ public class Point implements Coordinates {
     }
 
     //complete constructor
-    public Point(Long lat, Long lon){
+    public Point(Double lat, Double lon){
         super();
         this.lat = lat;
         this.lon = lon;
     }
 
     //getters
-    public Long getLat() { return lat; }
-    public Long getLon() { return lon; }
+    public Double getLat() { return lat; }
+    public Double getLon() { return lon; }
 
     //setters
-    public void setLat(Long lat) { this.lat = lat; }
-    public void setLon(Long lon) { this.lon = lon; }
+    public void setLat(Double lat) { this.lat = lat; }
+    public void setLon(Double lon) { this.lon = lon; }
 
     @Override
     public String toString() {
