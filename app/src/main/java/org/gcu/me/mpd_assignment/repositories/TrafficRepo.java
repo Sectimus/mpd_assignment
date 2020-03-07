@@ -28,6 +28,7 @@ public class TrafficRepo {
     public static class BuilderTask extends AsyncTask < String, Double, List < Traffic >> {
         private static int currentLines=0;
         private static int maxLines=0;
+        private final Boolean force;
         private final TaskListener taskListener;
         public interface TaskListener {
             void onFinished(List < Traffic > result);
@@ -35,9 +36,10 @@ public class TrafficRepo {
             void onBuildProgress(Double progress);
         }
 
-        public BuilderTask(TaskListener listener) {
+        public BuilderTask(TaskListener listener, Boolean force) {
             // The listener reference is passed in through the constructor
             this.taskListener = listener;
+            this.force = force;
         }
 
         //function used to increment the pullparser and publish the progress
@@ -51,120 +53,123 @@ public class TrafficRepo {
             return eventType;
         }
 
-        @SuppressLint("WrongThread")
         @Override
         protected List < Traffic > doInBackground(String...strings) {
+            //if a force refresh is chosen and the cache is already loaded
+            if (trafficCache != null && this.force){
+                trafficCache = null;
+            } else if(trafficCache != null){
+                this.taskListener.onFinished(trafficCache);
+            } else{
+                //TaskListener for remote RSS data retrieval
+                LoaderTask.TaskListener t = new LoaderTask.TaskListener() {
+                    @Override
+                    public void onFinished(String dataAsXML) {
+                        //when the data has been loaded, parse the text and build the models.
+                        trafficCache = new LinkedList < Traffic > ();
 
+                        maxLines = dataAsXML.split("\n").length-2;
+                        //parse the text
+                        try {
+                            XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
+                            factory.setNamespaceAware(true);
+                            XmlPullParser xpp = factory.newPullParser();
+                            xpp.setInput(new StringReader(dataAsXML));
 
-            //TaskListener for remote RSS data retrieval
-            LoaderTask.TaskListener t = new LoaderTask.TaskListener() {
-                @Override
-                public void onFinished(String dataAsXML) {
-                    //when the data has been loaded, parse the text and build the models.
-                    trafficCache = new LinkedList < Traffic > ();
+                            int eventType = xpp.getEventType();
+                            while (eventType != XmlPullParser.END_DOCUMENT) {
+                                if (eventType == XmlPullParser.START_TAG) {
+                                    switch (xpp.getName().toLowerCase()) {
+                                        case "channel":
+                                        {
+                                            // Get the next inner event
+                                            eventType = incrementPullParser(eventType, xpp);
+                                            if (eventType == XmlPullParser.TEXT && xpp.isWhitespace()){
+                                                //used for counting the progress
+                                                currentLines++;
+                                                publishProgress((double)(currentLines/maxLines)*100);
+                                            }
 
-                    maxLines = dataAsXML.split("\n").length-2;
-                    //parse the text
-                    try {
-                        XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
-                        factory.setNamespaceAware(true);
-                        XmlPullParser xpp = factory.newPullParser();
-                        xpp.setInput(new StringReader(dataAsXML));
-
-                        int eventType = xpp.getEventType();
-                        while (eventType != XmlPullParser.END_DOCUMENT) {
-                            if (eventType == XmlPullParser.START_TAG) {
-                                switch (xpp.getName().toLowerCase()) {
-                                    case "channel":
-                                    {
-                                        // Get the next inner event
-                                        eventType = incrementPullParser(eventType, xpp);
-                                        if (eventType == XmlPullParser.TEXT && xpp.isWhitespace()){
-                                            //used for counting the progress
-                                            currentLines++;
-                                            publishProgress((double)(currentLines/maxLines)*100);
-                                        }
-
-                                        while (eventType != XmlPullParser.END_DOCUMENT) {
-                                            if (eventType == XmlPullParser.START_TAG) {
-                                                switch (xpp.getName().toLowerCase()) {
-                                                    case "item":
-                                                    {
-                                                        Roadworks r = new Roadworks();
-                                                        //if it is not the end of this tag
+                                            while (eventType != XmlPullParser.END_DOCUMENT) {
+                                                if (eventType == XmlPullParser.START_TAG) {
+                                                    switch (xpp.getName().toLowerCase()) {
+                                                        case "item":
+                                                        {
+                                                            Roadworks r = new Roadworks();
+                                                            //if it is not the end of this tag
 //                                                        while (!(eventType == XmlPullParser.END_TAG && xpp.getName().toLowerCase().equals("item"))) {
-                                                        while (!(eventType == XmlPullParser.END_TAG && xpp.getName().toLowerCase().equals("item"))) {
-                                                            if (eventType == XmlPullParser.START_TAG) {
-                                                                switch (xpp.getName().toLowerCase()) {
-                                                                    case "title": {
-                                                                        r.setTitle(xpp.nextText());
-                                                                        break;
-                                                                    }
-                                                                    case "description": {
-                                                                        r.setDescription(xpp.nextText());
-                                                                        break;
-                                                                    }
-                                                                    case "link": {
-                                                                        r.setLink(xpp.nextText());
-                                                                        break;
-                                                                    }
-                                                                    case "point": {
-                                                                        //split into latlon
-                                                                        String raw = xpp.nextText();
-                                                                        String[] rawSplit = raw.split(" ");
+                                                            while (!(eventType == XmlPullParser.END_TAG && xpp.getName().toLowerCase().equals("item"))) {
+                                                                if (eventType == XmlPullParser.START_TAG) {
+                                                                    switch (xpp.getName().toLowerCase()) {
+                                                                        case "title": {
+                                                                            r.setTitle(xpp.nextText());
+                                                                            break;
+                                                                        }
+                                                                        case "description": {
+                                                                            r.setDescription(xpp.nextText());
+                                                                            break;
+                                                                        }
+                                                                        case "link": {
+                                                                            r.setLink(xpp.nextText());
+                                                                            break;
+                                                                        }
+                                                                        case "point": {
+                                                                            //split into latlon
+                                                                            String raw = xpp.nextText();
+                                                                            String[] rawSplit = raw.split(" ");
 
-                                                                        Point point = new Point(Double.parseDouble(rawSplit[0]), Double.parseDouble(rawSplit[1]));
-                                                                        r.setLocation(point);
-                                                                        break;
-                                                                    }
-                                                                    case "author": {
-                                                                        r.setAuthor(xpp.nextText());
-                                                                        break;
-                                                                    }
-                                                                    case "comments": {
-                                                                        // TODO comments as list
-                                                                        break;
+                                                                            Point point = new Point(Double.parseDouble(rawSplit[0]), Double.parseDouble(rawSplit[1]));
+                                                                            r.setLocation(point);
+                                                                            break;
+                                                                        }
+                                                                        case "author": {
+                                                                            r.setAuthor(xpp.nextText());
+                                                                            break;
+                                                                        }
+                                                                        case "comments": {
+                                                                            // TODO comments as list
+                                                                            break;
+                                                                        }
                                                                     }
                                                                 }
+                                                                eventType = xpp.next();
+                                                                eventType = incrementPullParser(eventType, xpp);
                                                             }
-                                                            eventType = xpp.next();
-                                                            eventType = incrementPullParser(eventType, xpp);
+                                                            trafficCache.add(r);
+                                                            // Get the next event
+                                                            break;
                                                         }
-                                                        trafficCache.add(r);
-                                                        // Get the next event
-                                                        break;
                                                     }
                                                 }
+                                                eventType = xpp.next();
+                                                eventType = incrementPullParser(eventType, xpp);
                                             }
-                                            eventType = xpp.next();
-                                            eventType = incrementPullParser(eventType, xpp);
+                                            break;
                                         }
-                                        break;
                                     }
                                 }
+                                eventType = xpp.next();
+                                eventType = incrementPullParser(eventType, xpp);
+                            } // End of while
+                            if (taskListener != null) {
+                                taskListener.onFinished(trafficCache);
                             }
-                            eventType = xpp.next();
-                            eventType = incrementPullParser(eventType, xpp);
-                        } // End of while
-                        if (taskListener != null) {
-                            taskListener.onFinished(trafficCache);
+                        } catch (XmlPullParserException e) {
+                            e.printStackTrace();
+                        } catch (IOException e) {
+                            e.printStackTrace();
                         }
-                    } catch (XmlPullParserException e) {
-                        e.printStackTrace();
-                    } catch (IOException e) {
-                        e.printStackTrace();
                     }
-                }
 
-                @Override
-                public void onDownloadProgress(Double progress) {
-                    taskListener.onDownloadProgress(progress);
-                }
-            };
-            LoaderTask loader = new LoaderTask(t);
+                    @Override
+                    public void onDownloadProgress(Double progress) {
+                        taskListener.onDownloadProgress(progress);
+                    }
+                };
+                LoaderTask loader = new LoaderTask(t);
 
-            loader.execute(strings[0]);
-
+                loader.execute(strings[0]);
+            }
             return null;
         }
 

@@ -22,7 +22,6 @@ public abstract class Traffic {
     private String author;
     private List<String> comments;
     private Date pubDate;
-    private static List<Traffic> trafficCache;
 
     public String getTitle() {
         return title;

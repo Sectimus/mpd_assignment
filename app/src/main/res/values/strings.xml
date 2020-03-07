@@ -3,4 +3,7 @@
     <string name="title_home">Home</string>
     <string name="title_map">Map</string>
     <string name="title_list">List</string>
+
+    <string name="loader_title_download">Download:</string>
+    <string name="loader_title_build">Build:</string>
 </resources>

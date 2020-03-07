@@ -14,31 +14,39 @@ import androidx.lifecycle.ViewModel;
 
 public class ListViewModel extends ViewModel {
 
-    private MutableLiveData<Double> mProgress;
+    private MutableLiveData<Double> mDownloadProg, mBuildProg;
+    private MutableLiveData<Boolean> mCompletedProg;
 
     public ListViewModel() {
-        mProgress = new MutableLiveData<>();
+        mDownloadProg = new MutableLiveData<>();
+        mBuildProg = new MutableLiveData<>();
+        mCompletedProg = new MutableLiveData<>();
+
+        //set the completed action to initiate at false;
+        mCompletedProg.postValue(false);
 
         Roadworks.load(new TrafficRepo.BuilderTask.TaskListener() {
 
             @Override
             public void onFinished(List<Traffic> result) {
-                System.out.println(result);
+                mCompletedProg.postValue(true);
             }
 
             @Override
             public void onDownloadProgress(Double progress) {
-                //mProgress.setValue(progress);
+                mDownloadProg.postValue(progress);
             }
 
             @Override
             public void onBuildProgress(Double progress) {
-                mProgress.setValue(progress);
+                mBuildProg.postValue(progress);
             }
-        });
+        }, false);
     }
 
-    public LiveData<Double> getProgress() {
-        return mProgress;
+    public LiveData<Double> getDownloadProgress() {
+        return mDownloadProg;
     }
+    public MutableLiveData<Double> getBuildProgress() { return mBuildProg; }
+    public MutableLiveData<Boolean> getCompletedProgress() { return mCompletedProg; }
 }
