@@ -22,7 +22,13 @@ import java.util.List;
 
 public class TrafficRepo {
     private static List < Traffic > trafficCache;
-    private static int unixLastUpdated;
+    public static boolean isLoaded(){
+        if (trafficCache != null){
+            return true;
+        } else{
+            return false;
+        }
+    }
 
     //gets all traffic
     public static class BuilderTask extends AsyncTask < String, Double, List < Traffic >> {
