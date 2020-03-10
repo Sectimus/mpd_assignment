@@ -45,10 +45,7 @@ public class MapFragment extends Fragment {
             loaderFragment = new LoaderFragment(this, new LoaderViewModel.OnLoadingCompleteListener() {
                 @Override
                 public void onLoadingComplete(List<Traffic> result) {
-                    //replace loaderfragment with this instance
-                    getFragmentManager().beginTransaction()
-                            .replace(loaderFragment.getId(), getOuter())
-                            .commit();
+                    build(result);
                 }
             });
             getFragmentManager().beginTransaction()
@@ -59,12 +56,12 @@ public class MapFragment extends Fragment {
         return root;
     }
 
-    private MapFragment getOuter(){
-        return this;
-    }
-
     private void build(List<Traffic> data){
-        //builds the stuff using the data
 
+        //builds the stuff using the data
+        //replace loaderfragment with this instance
+        getFragmentManager().beginTransaction()
+                .replace(loaderFragment.getId(), this)
+                .commit();
     }
 }

@@ -6,4 +6,5 @@
 
     <string name="loader_title_download">Download:</string>
     <string name="loader_title_build">Build:</string>
+    <string name="desc_traffic_icon">Traffic Icon</string>
 </resources>

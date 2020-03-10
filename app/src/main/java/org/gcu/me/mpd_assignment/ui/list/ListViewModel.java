@@ -13,6 +13,7 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 public class ListViewModel extends ViewModel {
+    private LiveData<List<Traffic>> traffic;
 
     public ListViewModel() {
 
