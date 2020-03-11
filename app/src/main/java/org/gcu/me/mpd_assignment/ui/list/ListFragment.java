@@ -8,10 +8,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.NonNull;
+import androidx.core.view.ViewCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
@@ -67,6 +69,8 @@ public class ListFragment extends Fragment {
             test.add(new Roadworks());
             listAdapter = new ListAdapter(new ItemFragment(), traffic);
             recyclerView.setAdapter(listAdapter);
+            //set cache size so that expanded views are not recycled.
+            recyclerView.setItemViewCacheSize(traffic.size());
         }
 
 

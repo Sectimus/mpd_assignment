@@ -7,4 +7,6 @@
     <string name="loader_title_download">Download:</string>
     <string name="loader_title_build">Build:</string>
     <string name="desc_traffic_icon">Traffic Icon</string>
+    <string name="placeholder_title">TITLE</string>
+    <string name="lorum_med">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam aliquam accumsan iaculis. Vestibulum ac tellus nisl. Donec at est sodales, aliquet mi in, rutrum leo. Fusce eu leo eget leo pharetra semper quis sed lectus. Sed condimentum viverra urna sit amet vestibulum. Mauris faucibus augue quis odio dapibus efficitur. Proin elementum hendrerit tincidunt. Sed venenatis est odio, in laoreet ex lacinia sit amet.</string>
 </resources>

@@ -2,9 +2,11 @@ package org.gcu.me.mpd_assignment.ui.list.item;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 import org.gcu.me.mpd_assignment.R;
@@ -18,6 +20,7 @@ public class ItemFragment extends Fragment {
     private TextView title, description;
     private ImageView image;
     private ItemViewModel viewmodel;
+    private ScrollView scrollView;
 
     @Nullable
     @Override
@@ -29,6 +32,8 @@ public class ItemFragment extends Fragment {
         this.title = root.findViewById(R.id.lbl_title);
         this.description = root.findViewById(R.id.lbl_description);
         this.image = root.findViewById(R.id.img_type);
+
+        System.out.println("ahahaha");
 
 
         viewmodel.getmTitle().observe(this, s -> title.setText(s));

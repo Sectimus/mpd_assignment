@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import androidx.annotation.NonNull;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -37,7 +38,16 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ListViewHolder
     public void onBindViewHolder(@NonNull ListViewHolder holder, int position) {
         Traffic t = traffic.get(position);
         holder.title.setText(t.getTitle());
-        holder.title.setText(t.getDescription());
+        holder.description.setText(t.getDescription());
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //invert the height from wrap_content to match_constraint
+                ViewGroup.LayoutParams params = holder.textWrapper.getLayoutParams();
+                params.height = params.height==0 ? ViewGroup.LayoutParams.WRAP_CONTENT : 0;
+                holder.textWrapper.setLayoutParams(params);
+            }
+        });
     }
 
     @Override
@@ -53,11 +63,14 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ListViewHolder
 
     public class ListViewHolder extends RecyclerView.ViewHolder{
         private TextView title, description;
+        private View itemView;
+        private ConstraintLayout textWrapper;
         public ListViewHolder(@NonNull View itemView) {
             super(itemView);
-
+            this.itemView = itemView;
             title = itemView.findViewById(R.id.lbl_title);
             description = itemView.findViewById(R.id.lbl_description);
+            textWrapper = itemView.findViewById(R.id.con_textwrapper);
         }
     }
 }
