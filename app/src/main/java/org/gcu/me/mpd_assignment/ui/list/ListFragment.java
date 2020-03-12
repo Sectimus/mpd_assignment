@@ -24,7 +24,6 @@ import org.gcu.me.mpd_assignment.R;
 import org.gcu.me.mpd_assignment.models.Roadworks;
 import org.gcu.me.mpd_assignment.models.Traffic;
 import org.gcu.me.mpd_assignment.repositories.TrafficRepo;
-import org.gcu.me.mpd_assignment.ui.list.item.ItemFragment;
 import org.gcu.me.mpd_assignment.ui.loader.LoaderFragment;
 import org.gcu.me.mpd_assignment.ui.loader.LoaderViewModel;
 
@@ -65,12 +64,9 @@ public class ListFragment extends Fragment {
         } else{
             //SET EMPTY ADAPTER
             recyclerView.setLayoutManager(new LinearLayoutManager(this.getContext()));
-            List<Traffic> test = new LinkedList<>();
-            test.add(new Roadworks());
-            listAdapter = new ListAdapter(new ItemFragment(), traffic);
+            listAdapter = new ListAdapter(this, traffic);
             recyclerView.setAdapter(listAdapter);
-            //set cache size so that expanded views are not recycled.
-            recyclerView.setItemViewCacheSize(traffic.size());
+
         }
 
 

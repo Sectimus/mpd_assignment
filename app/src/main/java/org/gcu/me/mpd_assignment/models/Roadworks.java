@@ -13,4 +13,9 @@ public class Roadworks extends Traffic{
         BuilderTask task = new BuilderTask(taskListener, force);
         task.execute(resource);
     }
+
+    @Override
+    public int getTrafficId() {
+        return 1;
+    }
 }

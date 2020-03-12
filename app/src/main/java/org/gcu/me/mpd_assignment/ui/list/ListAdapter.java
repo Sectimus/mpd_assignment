@@ -4,6 +4,7 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import org.gcu.me.mpd_assignment.R;
@@ -15,6 +16,7 @@ import java.util.List;
 import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.RecyclerView;
 
 public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ListViewHolder> {
@@ -29,9 +31,18 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ListViewHolder
     @NonNull
     @Override
     public ListViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View itemView = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.fragment_list_item, parent, false);
+        View itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.fragment_list_item, parent, false);
         return new ListViewHolder(itemView);
+    }
+
+    @Override
+    public void onViewRecycled(@NonNull ListViewHolder holder) {
+        super.onViewRecycled(holder);
+
+        //reset recycler attributes changed by the click
+        ViewGroup.LayoutParams params = holder.textWrapper.getLayoutParams();
+        params.height = 0;
+        holder.textWrapper.setLayoutParams(params);
     }
 
     @Override
@@ -39,7 +50,32 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ListViewHolder
         Traffic t = traffic.get(position);
         holder.title.setText(t.getTitle());
         holder.description.setText(t.getDescription());
-        holder.itemView.setOnClickListener(new View.OnClickListener() {
+
+
+        switch(t.getTrafficId()){
+            case 0:{
+                //Current Incidents
+                holder.imageView.setImageResource(R.drawable.ic_crash_24dp);
+                break;
+            }
+            case 1:{
+                //Roadworks
+                holder.imageView.setImageResource(R.drawable.ic_roadworks_24dp);
+                break;
+            }
+            case 2:{
+                //Planned Roadworks
+                holder.imageView.setImageResource(R.drawable.ic_road_time_24dp);
+                break;
+            }
+            default:{
+                //Unknown type
+                holder.imageView.setImageResource(R.drawable.ic_android_black_24dp);
+                break;
+            }
+        }
+
+        holder.textWrapper.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 //invert the height from wrap_content to match_constraint
@@ -65,12 +101,14 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ListViewHolder
         private TextView title, description;
         private View itemView;
         private ConstraintLayout textWrapper;
+        private ImageView imageView;
         public ListViewHolder(@NonNull View itemView) {
             super(itemView);
             this.itemView = itemView;
             title = itemView.findViewById(R.id.lbl_title);
             description = itemView.findViewById(R.id.lbl_description);
             textWrapper = itemView.findViewById(R.id.con_textwrapper);
+            imageView = itemView.findViewById(R.id.img_type);
         }
     }
 }

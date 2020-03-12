@@ -23,6 +23,8 @@ public abstract class Traffic {
     private List<String> comments;
     private Date pubDate;
 
+    public abstract int getTrafficId();
+
     public String getTitle() {
         return title;
     }
