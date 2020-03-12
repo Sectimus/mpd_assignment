@@ -62,15 +62,21 @@ public class ListFragment extends Fragment {
                     .replace(this.getId(), loaderFragment)
                     .commit();
         } else{
-            //SET EMPTY ADAPTER
-            recyclerView.setLayoutManager(new LinearLayoutManager(this.getContext()));
-            listAdapter = new ListAdapter(this, traffic);
-            recyclerView.setAdapter(listAdapter);
-
+            build();
         }
 
 
         return root;
+    }
+
+    private void build(){
+        //setup the recycler adapter
+        recyclerView.setLayoutManager(new LinearLayoutManager(this.getContext()));
+        listAdapter = new ListAdapter(this, traffic);
+        recyclerView.setAdapter(listAdapter);
+
+        //setup the spinner adapter
+        
     }
 
     private ListFragment getOuter(){
