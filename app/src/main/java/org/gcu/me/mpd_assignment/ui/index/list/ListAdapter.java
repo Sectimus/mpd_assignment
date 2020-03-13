@@ -1,6 +1,5 @@
-package org.gcu.me.mpd_assignment.ui.list;
+package org.gcu.me.mpd_assignment.ui.index.list;
 
-import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,22 +9,26 @@ import android.widget.TextView;
 import org.gcu.me.mpd_assignment.R;
 import org.gcu.me.mpd_assignment.models.Traffic;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.RecyclerView;
 
 public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ListViewHolder> {
     private List<Traffic> traffic;
     private Fragment context;
+    private ListAdapterListener listener;
 
-    public ListAdapter(Fragment context, List<Traffic> traffic){
+    public interface ListAdapterListener {
+        void onListItemClicked(Traffic t);
+    }
+
+    public ListAdapter(Fragment context, List<Traffic> traffic, ListAdapterListener listener){
         this.context = context;
         this.traffic = traffic;
+        this.listener = listener;
     }
 
     @NonNull
@@ -82,6 +85,9 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ListViewHolder
                 ViewGroup.LayoutParams params = holder.textWrapper.getLayoutParams();
                 params.height = params.height==0 ? ViewGroup.LayoutParams.WRAP_CONTENT : 0;
                 holder.textWrapper.setLayoutParams(params);
+
+                //call the interface listener
+                listener.onListItemClicked(t);
             }
         });
     }

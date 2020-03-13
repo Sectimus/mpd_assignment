@@ -9,6 +9,7 @@
         android:id="@+id/lay_locationsearch"
         android:layout_width="match_parent"
         android:layout_height="40dp"
+        android:baselineAligned="false"
         android:orientation="horizontal"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -23,8 +24,9 @@
                 android:id="@+id/editText"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:autofillHints=""
                 android:ems="10"
-                android:hint="123 Alexandria Street"
+                android:hint="@string/default_streetname"
                 android:inputType="textPostalAddress" />
 
         </RelativeLayout>
@@ -42,19 +44,14 @@
 
     </LinearLayout>
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rec_list"
-        android:layout_width="0dp"
+    <FrameLayout
+        android:id="@+id/trafficlist_fragment_container"
+        android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_marginStart="10dp"
-        android:layout_marginEnd="10dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/lay_locationsearch"
-        tools:listitem="@layout/fragment_list_item">
-
-    </androidx.recyclerview.widget.RecyclerView>
+        tools:layout="@layout/fragment_trafficlist" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

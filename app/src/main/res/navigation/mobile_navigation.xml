@@ -18,8 +18,8 @@
         tools:layout="@layout/fragment_map" />
 
     <fragment
-        android:id="@+id/navigation_list"
-        android:name="org.gcu.me.mpd_assignment.ui.list.ListFragment"
+        android:id="@+id/navigation_index"
+        android:name="org.gcu.me.mpd_assignment.ui.index.IndexFragment"
         android:label="@string/title_list"
-        tools:layout="@layout/fragment_list" />
+        tools:layout="@layout/fragment_index" />
 </navigation>
