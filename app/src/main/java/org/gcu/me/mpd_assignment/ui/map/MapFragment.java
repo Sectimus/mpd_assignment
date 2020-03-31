@@ -52,10 +52,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                     //replace loaderfragment with this instance
                     traffic = result;
                     getActivity().runOnUiThread(() -> {
-                                getFragmentManager().beginTransaction()
-                                        .replace(loaderFragment.getId(), getOuter())
-                                        .commit();
-                            });
+                        getFragmentManager().beginTransaction()
+                                .replace(loaderFragment.getId(), getOuter())
+                                .commit();
+                    });
                     //build the view
                 }
             });
@@ -68,25 +68,27 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         } else{
             mapFragment.getMapAsync(this);
         }
+
+        int orientation = this.getResources().getConfiguration().orientation;
         MainActivity activity = (MainActivity) getActivity();
         BottomNavigationView nav = activity.getNavView();
-        nav.setVisibility(View.GONE);
-        int orientation = this.getResources().getConfiguration().orientation;
         if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
             // code for landscape mode
             //inner fragment creation
+
             Fragment trafficListFragment = new TrafficListFragment(new TrafficListFragment.ListFragmentListener() {
                 @Override
                 public List<Traffic> getTrafficList() {
                     return traffic;
                 }
             });
+
             FragmentTransaction transaction = getChildFragmentManager().beginTransaction();
             transaction.replace(R.id.trafficlist_fragment_container, trafficListFragment).commit();
+            nav.setVisibility(View.GONE);
+        } else{
+            nav.setVisibility(View.VISIBLE);
         }
-
-
-
         return root;
     }
 

@@ -1,5 +1,7 @@
 package org.gcu.me.mpd_assignment.models;
 
+import android.os.Parcel;
+
 import org.gcu.me.mpd_assignment.repositories.TrafficRepo.BuilderTask;
 
 public class Roadworks extends Traffic{
