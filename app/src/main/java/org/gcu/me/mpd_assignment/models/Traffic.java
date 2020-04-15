@@ -12,6 +12,7 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 public abstract class Traffic {
@@ -22,6 +23,16 @@ public abstract class Traffic {
     private String author;
     private List<String> comments;
     private Date pubDate;
+    private HashMap<String, String> properties;
+
+    public Traffic(){
+        this.properties = new HashMap<>();
+    }
+
+    public HashMap<String, String> addProperty(String key, String value){
+        this.properties.put(key, value);
+        return this.properties;
+    }
 
     public abstract int getTrafficId();
 
@@ -80,4 +91,8 @@ public abstract class Traffic {
     public void setPubDate(Date pubDate) {
         this.pubDate = pubDate;
     }
+
+    public HashMap<String, String> getProperties() {return properties;}
+
+    public void setProperties(HashMap<String, String> properties) {this.properties = properties;}
 }

@@ -17,6 +17,12 @@ import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.net.URL;
 import java.net.URLConnection;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -112,7 +118,104 @@ public class TrafficRepo {
                                                                             break;
                                                                         }
                                                                         case "description": {
-                                                                            r.setDescription(xpp.nextText());
+                                                                            String description = xpp.nextText();
+                                                                            //split the text using regex to check for the breaks
+                                                                            String[] brsections = description.split("\\<\\s*br\\s*/?\\s*>");
+
+                                                                            //get the data from the encoded string using colons
+                                                                            for (String brsection : brsections) {
+                                                                                String[] keyvalues = brsection.split(":", 2);
+                                                                                String key = keyvalues[0].trim();
+                                                                                String value = keyvalues[1].trim();
+
+                                                                                switch(key.toLowerCase()){
+                                                                                    case "start date": {
+                                                                                        //EXAMPLE --- Start Date: Friday, 20 March 2020 - 00:00
+                                                                                        //parse the start date
+                                                                                        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEEE, dd MMMM yyyy - HH:mm");
+                                                                                        LocalDateTime dt = LocalDateTime.parse(value, formatter);
+
+                                                                                        r.setStart(dt);
+                                                                                        break;
+                                                                                    }
+                                                                                    case "end date": {
+                                                                                        //EXAMPLE --- End Date: Saturday, 21 March 2020 - 00:00
+                                                                                        //parse the end date
+                                                                                        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEEE, dd MMMM yyyy - HH:mm");
+                                                                                        LocalDateTime dt = LocalDateTime.parse(value, formatter);
+
+                                                                                        r.setEnd(dt);
+                                                                                        break;
+                                                                                    }
+                                                                                    case "works":{
+                                                                                        //EXAMPLE --- Works: Cyclic Maintenance Traffic Management: Lane Closure.
+                                                                                        r.setDescription(brsection);
+                                                                                        //From here on, all properties are split by double newlines
+                                                                                        ArrayList<String> properties = new ArrayList<>();
+                                                                                        properties.addAll(Arrays.asList(brsection.split("\n\n")));
+
+                                                                                        //check if any of the properties has only one line, sometimes diversion info is shown as below
+                                                                                        /*
+                                                                                        Diversion Information:
+
+                                                                                        1.	North St - Charing X EB on - End
+                                                                                        2.	N/A
+                                                                                        3.	M8 EB - Jct 14 EB off - Return Jct 14 WB On - Jct 16 WB Off - Dobbies Loan - Phoenix Rd - St Georges Rd - End
+                                                                                        */
+
+                                                                                        int i = 0;
+                                                                                        List<String> toRemove = new ArrayList<String>();
+                                                                                        for (String property : properties){
+                                                                                            if(property.split("\n").length < 2){
+                                                                                                //add the next property along as the value
+                                                                                                //if this is the last property and its empty, assume its a value that's not attached like the example below
+                                                                                                /*
+                                                                                                Diversion Information:
+                                                                                                Div a:Continue to Rbt at Paisley Road West - re join at Jct 23 EB on slip
+
+                                                                                                Div b: Continue Helen St - Edmiston Drive - Broomloan Road  - M8 Jct 23 EB on slip
+                                                                                                 */
+
+                                                                                                if(properties.size()-1 == i){
+                                                                                                    String oneBehind = properties.get(i-1);
+                                                                                                    oneBehind+=property;
+                                                                                                    properties.set(i, oneBehind);
+                                                                                                    toRemove.add(property);
+                                                                                                } else{
+                                                                                                    String oneAhead = properties.get(i+1);
+                                                                                                    property+=oneAhead;
+                                                                                                    properties.set(i, property);
+                                                                                                    toRemove.add(oneAhead);
+                                                                                                }
+                                                                                            }
+                                                                                            i++;
+                                                                                        }
+                                                                                        properties.removeAll(toRemove);
+
+
+                                                                                        for (String property : properties) {
+                                                                                            //each property has its key/value split with a single newline
+                                                                                            keyvalues = property.split(":");
+                                                                                            key = keyvalues[0].trim();
+                                                                                            value = keyvalues[1].trim();
+
+                                                                                            /*the colon ":" could be leftover at the end of the key,
+                                                                                            this strips it away if it exists*/
+                                                                                            String lastchar = key.substring(key.length() - 1);
+                                                                                            if(lastchar.equals(":")){
+                                                                                                key = key.substring(0, key.length()-1).trim();
+                                                                                            }
+
+                                                                                            r.addProperty(key, value);
+                                                                                        }
+                                                                                        break;
+                                                                                    }
+                                                                                    default: {
+                                                                                        //EXAMPLE --- Works: Cyclic Maintenance Traffic Management: Lane Closure.
+                                                                                        r.setDescription(brsection);
+                                                                                    }
+                                                                                }
+                                                                            }
                                                                             break;
                                                                         }
                                                                         case "link": {

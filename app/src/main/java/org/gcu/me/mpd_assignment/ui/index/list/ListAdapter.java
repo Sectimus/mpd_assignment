@@ -7,9 +7,12 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import org.gcu.me.mpd_assignment.R;
+import org.gcu.me.mpd_assignment.models.Roadworks;
 import org.gcu.me.mpd_assignment.models.Traffic;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.ConstraintLayout;
@@ -52,22 +55,37 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ListViewHolder
     public void onBindViewHolder(@NonNull ListViewHolder holder, int position) {
         Traffic t = traffic.get(position);
         holder.title.setText(t.getTitle());
-        holder.description.setText(t.getDescription());
 
 
         switch(t.getTrafficId()){
             case 0:{
                 //Current Incidents
+                holder.description.setText(t.getDescription());
                 holder.imageView.setImageResource(R.drawable.ic_crash_24dp);
                 break;
             }
             case 1:{
                 //Roadworks
+                Roadworks r = (Roadworks) t;
+
+                String description = "";
+
+                for(Map.Entry<String, String> entry : r.getProperties().entrySet()) {
+                    String key = entry.getKey();
+                    String value = entry.getValue();
+
+                    description+=key;
+                    description+=value;
+                }
+            //    String description = r.getDescription();
+                description+="\nStart: "+r.getFormattedStart()+"\nFinish: "+r.getFormattedEnd()+"\nTime until finished:";
+                holder.description.setText(description);
                 holder.imageView.setImageResource(R.drawable.ic_roadworks_24dp);
                 break;
             }
             case 2:{
                 //Planned Roadworks
+                holder.description.setText(t.getDescription());
                 holder.imageView.setImageResource(R.drawable.ic_road_time_24dp);
                 break;
             }

@@ -1,5 +1,7 @@
 package org.gcu.me.mpd_assignment.ui.loader;
 
+import org.gcu.me.mpd_assignment.models.CurrentRoadworks;
+import org.gcu.me.mpd_assignment.models.PlannedRoadworks;
 import org.gcu.me.mpd_assignment.models.Roadworks;
 import org.gcu.me.mpd_assignment.models.Traffic;
 import org.gcu.me.mpd_assignment.repositories.TrafficRepo;
@@ -31,7 +33,7 @@ public class LoaderViewModel extends ViewModel {
 
     public void attachListener(OnLoadingCompleteListener _loadingCompleteListener){
         this.loadingCompleteListener = _loadingCompleteListener;
-        Roadworks.load(new TrafficRepo.BuilderTask.TaskListener() {
+        PlannedRoadworks.load(new TrafficRepo.BuilderTask.TaskListener() {
 
             @Override
             public void onFinished(List<Traffic> result) {
