@@ -27,6 +27,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import org.gcu.me.mpd_assignment.MainActivity;
 import org.gcu.me.mpd_assignment.R;
+import org.gcu.me.mpd_assignment.models.PlannedRoadworks;
 import org.gcu.me.mpd_assignment.models.Roadworks;
 import org.gcu.me.mpd_assignment.models.Traffic;
 import org.gcu.me.mpd_assignment.models.georss.Point;
@@ -51,29 +52,56 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
     //side view
     private Fragment trafficlist;
 
+    private Class<?> trafficType;
 
     //orientation used to change select operation
     private int orientation;
 
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
 
-    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        if(this.trafficType != null){
+            outState.putString("lastTrafficType", this.trafficType.getName());
+        }
+    }
 
-        mapViewModel = ViewModelProviders.of(this).get(MapViewModel.class);
-        View root = inflater.inflate(R.layout.fragment_map, container, false);
-        SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
+    private void loadifneeded(Bundle savedInstanceState, SupportMapFragment mapFragment, View root, boolean isCallback){
+        boolean force = false;
 
+        //set the traffic to null if the lastTrafficType is different to the current one.
+        if(savedInstanceState != null){
+            String lastTrafficType = savedInstanceState.getString("lastTrafficType");
+            if(lastTrafficType != this.trafficType.getName()){
+                this.traffic = null;
+                force = true;
+            }
+        }
+
+        MapFragment mf = this;
+        //if its a view callback
+        if(isCallback){
+            mf = new MapFragment();
+            mf.setArguments(this.getArguments());
+            //set traffic to null for the reset
+            traffic = null;
+            force = true;
+        }
+        System.out.println("a");
 
         if (traffic == null){ //then get the traffic
-            loaderFragment = new LoaderFragment(this, new LoaderViewModel.OnLoadingCompleteListener() {
+            MapFragment finalMf = mf;
+            loaderFragment = new LoaderFragment(trafficType, force, finalMf, new LoaderViewModel.OnLoadingCompleteListener() {
                 @Override
                 public void onLoadingComplete(List<Traffic> result) {
                     //replace loaderfragment with this instance
-                    traffic = result;
-                    getActivity().runOnUiThread(() -> {
-                        getFragmentManager().beginTransaction()
-                                .replace(loaderFragment.getId(), getOuter())
+                    finalMf.traffic = result;
+                    loaderFragment.getActivity().runOnUiThread(() -> {
+                        loaderFragment.getFragmentManager().beginTransaction()
+                                .replace(loaderFragment.getId(), finalMf)
                                 .commit();
                     });
+
                     //build the view
                 }
             });
@@ -90,6 +118,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         this.orientation = this.getResources().getConfiguration().orientation;
         MainActivity activity = (MainActivity) getActivity();
         BottomNavigationView nav = activity.getNavView();
+
         if (this.orientation == Configuration.ORIENTATION_LANDSCAPE) {
             // code for landscape mode
             //inner fragment creation
@@ -115,6 +144,25 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
             //show the nav
             nav.setVisibility(View.VISIBLE);
         }
+    }
+
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        this.trafficType = ((MainActivity) getActivity()).getTrafficType();
+
+        mapViewModel = ViewModelProviders.of(this).get(MapViewModel.class);
+        View root = inflater.inflate(R.layout.fragment_map, container, false);
+        SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
+
+        ((MainActivity) getActivity()).setActionBarListener(new MainActivity.ActionBarListener() {
+            @Override
+            public void onFeedChanged() {
+                loadifneeded(savedInstanceState, mapFragment, root, true);
+            }
+        });
+
+        loadifneeded(savedInstanceState, mapFragment, root, false);
+
+        //set the loaded
         return root;
     }
 

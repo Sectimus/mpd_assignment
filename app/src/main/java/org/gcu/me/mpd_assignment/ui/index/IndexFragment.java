@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import org.gcu.me.mpd_assignment.R;
+import org.gcu.me.mpd_assignment.models.PlannedRoadworks;
 import org.gcu.me.mpd_assignment.models.Traffic;
 import org.gcu.me.mpd_assignment.ui.index.list.ListAdapter;
 import org.gcu.me.mpd_assignment.ui.index.list.TrafficListFragment;
@@ -37,12 +38,14 @@ public class IndexFragment extends Fragment {
     }
 
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        boolean force = false;
+
         super.onCreate(savedInstanceState);
         indexViewModel = ViewModelProviders.of(this).get(IndexViewModel.class);
         View root = inflater.inflate(R.layout.fragment_index, container, false);
 
         if (traffic == null){ //then get the traffic
-            loaderFragment = new LoaderFragment(this, new LoaderViewModel.OnLoadingCompleteListener() {
+            loaderFragment = new LoaderFragment(PlannedRoadworks.class, force, this, new LoaderViewModel.OnLoadingCompleteListener() {
                 @Override
                 public void onLoadingComplete(List<Traffic> result) {
                     //replace loaderfragment with this instance

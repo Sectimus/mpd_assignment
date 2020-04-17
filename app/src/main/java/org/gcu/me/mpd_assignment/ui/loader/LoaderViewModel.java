@@ -1,6 +1,6 @@
 package org.gcu.me.mpd_assignment.ui.loader;
 
-import org.gcu.me.mpd_assignment.models.CurrentRoadworks;
+import org.gcu.me.mpd_assignment.models.Incident;
 import org.gcu.me.mpd_assignment.models.PlannedRoadworks;
 import org.gcu.me.mpd_assignment.models.Roadworks;
 import org.gcu.me.mpd_assignment.models.Traffic;
@@ -16,6 +16,7 @@ public class LoaderViewModel extends ViewModel {
 
     private MutableLiveData<Double> mDownloadProg, mBuildProg;
     private MutableLiveData<Boolean> mCompletedProg;
+    private Class<?> trafficType;
     public OnLoadingCompleteListener loadingCompleteListener;
 
     public interface OnLoadingCompleteListener {
@@ -31,9 +32,11 @@ public class LoaderViewModel extends ViewModel {
         mCompletedProg.postValue(false);
     }
 
-    public void attachListener(OnLoadingCompleteListener _loadingCompleteListener){
+    public void attachListener(Class<?> trafficType, boolean force, OnLoadingCompleteListener _loadingCompleteListener){
         this.loadingCompleteListener = _loadingCompleteListener;
-        PlannedRoadworks.load(new TrafficRepo.BuilderTask.TaskListener() {
+
+        //setup the task listener
+        TrafficRepo.BuilderTask.TaskListener tl = new TrafficRepo.BuilderTask.TaskListener() {
 
             @Override
             public void onFinished(List<Traffic> result) {
@@ -50,7 +53,17 @@ public class LoaderViewModel extends ViewModel {
             public void onBuildProgress(Double progress) {
                 mBuildProg.postValue(progress);
             }
-        }, false);
+        };
+
+
+        if(trafficType == Roadworks.class){
+            Roadworks.load(tl, force);
+        } else if(trafficType == PlannedRoadworks.class){
+            PlannedRoadworks.load(tl, force);
+        } else if(trafficType == Incident.class){
+            Incident.load(tl, force);
+        }
+
     }
 
     public LiveData<Double> getDownloadProgress() {

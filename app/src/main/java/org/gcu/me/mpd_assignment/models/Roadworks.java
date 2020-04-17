@@ -2,6 +2,7 @@ package org.gcu.me.mpd_assignment.models;
 
 import android.os.Parcel;
 
+import org.gcu.me.mpd_assignment.repositories.TrafficRepo;
 import org.gcu.me.mpd_assignment.repositories.TrafficRepo.BuilderTask;
 
 import java.time.Duration;
@@ -21,14 +22,21 @@ public class Roadworks extends Traffic{
     public void setEnd(LocalDateTime end) {this.end = end;}
 
     private static final String resource = "https://trafficscotland.org/rss/feeds/roadworks.aspx";
+
     public Roadworks() {
         super();
     }
 
-    @Override
-    public int getTrafficId() {
-        return 1;
+    public static void load(BuilderTask.TaskListener taskListener, Boolean force) {
+        Traffic.load(resource, taskListener, force);
     }
+
+    //loads all roadworks
+//    @Override
+//    public static void load(TrafficRepo.BuilderTask.TaskListener taskListener, Boolean force) {
+//        TrafficRepo.BuilderTask task = new TrafficRepo.BuilderTask(taskListener, force);
+//        task.execute(resource);
+//    }
 
     //returns the duration of this roadwork in seconds
     public Long getDuration(){

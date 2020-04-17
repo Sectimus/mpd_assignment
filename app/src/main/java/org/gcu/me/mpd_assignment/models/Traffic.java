@@ -34,7 +34,10 @@ public abstract class Traffic {
         return this.properties;
     }
 
-    public abstract int getTrafficId();
+    protected static void load(String resource, TrafficRepo.BuilderTask.TaskListener taskListener, Boolean force){
+        TrafficRepo.BuilderTask task = new TrafficRepo.BuilderTask(taskListener, force);
+        task.execute(resource);
+    }
 
     public String getTitle() {
         return title;

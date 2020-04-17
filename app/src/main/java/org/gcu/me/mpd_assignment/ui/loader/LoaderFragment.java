@@ -7,7 +7,12 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 
+import org.gcu.me.mpd_assignment.MainActivity;
 import org.gcu.me.mpd_assignment.R;
+import org.gcu.me.mpd_assignment.models.Incident;
+import org.gcu.me.mpd_assignment.models.PlannedRoadworks;
+import org.gcu.me.mpd_assignment.models.Roadworks;
+import org.gcu.me.mpd_assignment.models.Traffic;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -19,16 +24,22 @@ public class LoaderFragment extends Fragment {
     private LoaderViewModel loaderViewModel;
     private Fragment replacement;
     private LoaderViewModel.OnLoadingCompleteListener onLoadingCompleteListener;
+    private Class<?> trafficType;
+    private boolean force;
 
-    public LoaderFragment(Fragment replacement, LoaderViewModel.OnLoadingCompleteListener onLoadingCompleteListener){
+    public LoaderFragment(Class<?> trafficType, boolean force, Fragment replacement, LoaderViewModel.OnLoadingCompleteListener onLoadingCompleteListener){
         super();
         this.onLoadingCompleteListener = onLoadingCompleteListener;
         this.replacement = replacement;
+        this.trafficType = trafficType;
+        this.force = force;
     }
 
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        this.trafficType = ((MainActivity) this.getActivity()).getTrafficType(); //TODO TEST
+
         loaderViewModel = ViewModelProviders.of(this).get(LoaderViewModel.class);
-        loaderViewModel.attachListener(onLoadingCompleteListener);
+        loaderViewModel.attachListener(this.trafficType, this.force, onLoadingCompleteListener);
         View root = inflater.inflate(R.layout.fragment_loader, container, false);
 
         final ProgressBar downloadProgressBar = root.findViewById(R.id.prog_repoLoader);

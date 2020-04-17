@@ -57,13 +57,30 @@
                     app:layout_constraintTop_toTopOf="parent" />
 
                 <TextView
+                    android:background="#e5e5e5"
                     android:id="@+id/lbl_description"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:text="@string/lorum_med"
+                    android:gravity="center_horizontal"
+                    android:textSize="18sp"
+                    app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-
                     app:layout_constraintTop_toBottomOf="@+id/lbl_title" />
+
+                <TableLayout
+                    android:id="@+id/lay_props"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:background="#f1f1f1"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/lbl_description">
+
+
+
+
+                </TableLayout>
+
             </androidx.constraintlayout.widget.ConstraintLayout>
 
         </androidx.constraintlayout.widget.ConstraintLayout>

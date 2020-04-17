@@ -4,13 +4,16 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.TableLayout;
+import android.widget.TableRow;
 import android.widget.TextView;
 
 import org.gcu.me.mpd_assignment.R;
+import org.gcu.me.mpd_assignment.models.PlannedRoadworks;
 import org.gcu.me.mpd_assignment.models.Roadworks;
 import org.gcu.me.mpd_assignment.models.Traffic;
+import org.gcu.me.mpd_assignment.models.Incident;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -51,49 +54,50 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ListViewHolder
         holder.textWrapper.setLayoutParams(params);
     }
 
+    private TableRow createTableRowFromProps(String key, String value){
+        TableRow tr = (TableRow) context.getLayoutInflater().inflate(R.layout._fragment_list_item_property, null);
+
+        ((TextView) tr.findViewById(R.id.key)).setText(key);
+        ((TextView) tr.findViewById(R.id.value)).setText(value);
+
+        return tr;
+    }
+
     @Override
     public void onBindViewHolder(@NonNull ListViewHolder holder, int position) {
         Traffic t = traffic.get(position);
         holder.title.setText(t.getTitle());
 
+        //redraw the properties
+        holder.properties.removeAllViews();
+        for(Map.Entry<String, String> entry : t.getProperties().entrySet()) {
+            String key = entry.getKey();
+            String value = entry.getValue();
 
-        switch(t.getTrafficId()){
-            case 0:{
-                //Current Incidents
-                holder.description.setText(t.getDescription());
-                holder.imageView.setImageResource(R.drawable.ic_crash_24dp);
-                break;
+            if(key.toLowerCase().equals("works")){
+                //this is the type of roadwork
+                holder.description.setText(value);
+            } else{
+                TableRow tr = createTableRowFromProps(key, value);
+                holder.properties.addView(tr);
             }
-            case 1:{
-                //Roadworks
-                Roadworks r = (Roadworks) t;
+        }
 
-                String description = "";
+        if(t instanceof Roadworks){
+            //Roadworks
+            Roadworks r = (Roadworks) t;
 
-                for(Map.Entry<String, String> entry : r.getProperties().entrySet()) {
-                    String key = entry.getKey();
-                    String value = entry.getValue();
-
-                    description+=key;
-                    description+=value;
-                }
-            //    String description = r.getDescription();
-                description+="\nStart: "+r.getFormattedStart()+"\nFinish: "+r.getFormattedEnd()+"\nTime until finished:";
-                holder.description.setText(description);
-                holder.imageView.setImageResource(R.drawable.ic_roadworks_24dp);
-                break;
-            }
-            case 2:{
-                //Planned Roadworks
-                holder.description.setText(t.getDescription());
-                holder.imageView.setImageResource(R.drawable.ic_road_time_24dp);
-                break;
-            }
-            default:{
-                //Unknown type
-                holder.imageView.setImageResource(R.drawable.ic_android_black_24dp);
-                break;
-            }
+//          description+="\nStart: "+r.getFormattedStart()+"\nFinish: "+r.getFormattedEnd()+"\nTime until finished:";
+            holder.imageView.setImageResource(R.drawable.ic_roadworks_24dp);
+        } else if(t instanceof PlannedRoadworks){
+            //Planned Roadworks
+            holder.imageView.setImageResource(R.drawable.ic_road_time_24dp);
+        } else if(t instanceof Incident){
+            //Current Incidents
+            holder.imageView.setImageResource(R.drawable.ic_crash_24dp);
+        } else{
+            //Unknown type
+            holder.imageView.setImageResource(R.drawable.ic_android_black_24dp);
         }
 
         holder.textWrapper.setOnClickListener(new View.OnClickListener() {
@@ -126,6 +130,7 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ListViewHolder
         private View itemView;
         private ConstraintLayout textWrapper;
         private ImageView imageView;
+        private TableLayout properties;
         public ListViewHolder(@NonNull View itemView) {
             super(itemView);
             this.itemView = itemView;
@@ -133,6 +138,7 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ListViewHolder
             description = itemView.findViewById(R.id.lbl_description);
             textWrapper = itemView.findViewById(R.id.con_textwrapper);
             imageView = itemView.findViewById(R.id.img_type);
+            properties = itemView.findViewById(R.id.lay_props);
         }
     }
 }

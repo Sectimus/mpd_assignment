@@ -27,7 +27,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class TrafficRepo {
-    private static List < Traffic > trafficCache;
+    private static List <Traffic> trafficCache;
     public static boolean isLoaded(){
         if (trafficCache != null){
             return true;
@@ -72,59 +72,66 @@ public class TrafficRepo {
                 trafficCache = null;
             } else if(trafficCache != null){
                 this.taskListener.onFinished(trafficCache);
-            } else{
-                //TaskListener for remote RSS data retrieval
-                LoaderTask.TaskListener t = new LoaderTask.TaskListener() {
-                    @Override
-                    public void onFinished(String dataAsXML) {
-                        //when the data has been loaded, parse the text and build the models.
-                        trafficCache = new LinkedList < Traffic > ();
+                return null;
+            }
+            //TaskListener for remote RSS data retrieval
+            LoaderTask.TaskListener t = new LoaderTask.TaskListener() {
+                @Override
+                public void onFinished(String dataAsXML) {
+                    //when the data has been loaded, parse the text and build the models.
+                    trafficCache = new LinkedList < Traffic > ();
 
-                        maxLines = dataAsXML.split("\n").length-2;
-                        //parse the text
-                        try {
-                            XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
-                            factory.setNamespaceAware(true);
-                            XmlPullParser xpp = factory.newPullParser();
-                            xpp.setInput(new StringReader(dataAsXML));
+                    maxLines = dataAsXML.split("\n").length-2;
+                    //parse the text
+                    try {
+                        XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
+                        factory.setNamespaceAware(true);
+                        XmlPullParser xpp = factory.newPullParser();
+                        xpp.setInput(new StringReader(dataAsXML));
 
-                            int eventType = xpp.getEventType();
-                            while (eventType != XmlPullParser.END_DOCUMENT) {
-                                if (eventType == XmlPullParser.START_TAG) {
-                                    switch (xpp.getName().toLowerCase()) {
-                                        case "channel":
-                                        {
-                                            // Get the next inner event
-                                            eventType = incrementPullParser(eventType, xpp);
-                                            if (eventType == XmlPullParser.TEXT && xpp.isWhitespace()){
-                                                //used for counting the progress
-                                                currentLines++;
-                                                publishProgress((double)(currentLines/maxLines)*100);
-                                            }
+                        int eventType = xpp.getEventType();
+                        while (eventType != XmlPullParser.END_DOCUMENT) {
+                            if (eventType == XmlPullParser.START_TAG) {
+                                switch (xpp.getName().toLowerCase()) {
+                                    case "channel":
+                                    {
+                                        // Get the next inner event
+                                        eventType = incrementPullParser(eventType, xpp);
+                                        if (eventType == XmlPullParser.TEXT && xpp.isWhitespace()){
+                                            //used for counting the progress
+                                            currentLines++;
+                                            publishProgress((double)(currentLines/maxLines)*100);
+                                        }
 
-                                            while (eventType != XmlPullParser.END_DOCUMENT) {
-                                                if (eventType == XmlPullParser.START_TAG) {
-                                                    switch (xpp.getName().toLowerCase()) {
-                                                        case "item":
-                                                        {
-                                                            Roadworks r = new Roadworks();
-                                                            //if it is not the end of this tag
+                                        while (eventType != XmlPullParser.END_DOCUMENT) {
+                                            if (eventType == XmlPullParser.START_TAG) {
+                                                switch (xpp.getName().toLowerCase()) {
+                                                    case "item":
+                                                    {
+                                                        Roadworks r = new Roadworks();
+                                                        //if it is not the end of this tag
 //                                                        while (!(eventType == XmlPullParser.END_TAG && xpp.getName().toLowerCase().equals("item"))) {
-                                                            while (!(eventType == XmlPullParser.END_TAG && xpp.getName().toLowerCase().equals("item"))) {
-                                                                if (eventType == XmlPullParser.START_TAG) {
-                                                                    switch (xpp.getName().toLowerCase()) {
-                                                                        case "title": {
-                                                                            r.setTitle(xpp.nextText());
-                                                                            break;
-                                                                        }
-                                                                        case "description": {
-                                                                            String description = xpp.nextText();
-                                                                            //split the text using regex to check for the breaks
-                                                                            String[] brsections = description.split("\\<\\s*br\\s*/?\\s*>");
+                                                        while (!(eventType == XmlPullParser.END_TAG && xpp.getName().toLowerCase().equals("item"))) {
+                                                            if (eventType == XmlPullParser.START_TAG) {
+                                                                switch (xpp.getName().toLowerCase()) {
+                                                                    case "title": {
+                                                                        r.setTitle(xpp.nextText());
+                                                                        break;
+                                                                    }
+                                                                    case "description": {
+                                                                        String description = xpp.nextText();
+                                                                        //split the text using regex to check for the breaks
+                                                                        String[] brsections = description.split("\\<\\s*br\\s*/?\\s*>");
 
-                                                                            //get the data from the encoded string using colons
-                                                                            for (String brsection : brsections) {
-                                                                                String[] keyvalues = brsection.split(":", 2);
+                                                                        //get the data from the encoded string using colons
+                                                                        for (String brsection : brsections) {
+                                                                            String[] keyvalues = brsection.split(":", 2);
+
+                                                                            /*check if there is no alternative info to get from the description, sometimes (mostly in current incidents)
+                                                                            there is only a description, instead of the predesignated format of two break tags and CRLF seperated sections*/
+                                                                            if(brsections.length < 3 && keyvalues.length < 2){
+                                                                                r.setDescription(brsection);
+                                                                            } else{
                                                                                 String key = keyvalues[0].trim();
                                                                                 String value = keyvalues[1].trim();
 
@@ -147,6 +154,33 @@ public class TrafficRepo {
                                                                                         r.setEnd(dt);
                                                                                         break;
                                                                                     }
+                                                                                    case "type":{
+                                                                                        //EXAMPLE --- TYPE : AWP Location : The M6 northbound entry slip at junction J43 Lane Closures : Lanes 1 and 2 wi
+                                                                                        r.setDescription(brsection);
+
+                                                                                        //remove type initiator
+                                                                                        brsection = brsection.substring(6);
+
+                                                                                        ArrayList<String> properties = new ArrayList<>();
+                                                                                        properties.addAll(Arrays.asList(brsection.split("  ")));
+
+                                                                                        for (String property : properties) {
+                                                                                            //each property has its key/value split with a single newline
+                                                                                            keyvalues = property.split(":");
+                                                                                            key = keyvalues[0].trim();
+                                                                                            value = keyvalues[1].trim();
+
+                                                                                        /*the colon ":" could be leftover at the end of the key,
+                                                                                        this strips it away if it exists*/
+                                                                                            String lastchar = key.substring(key.length() - 1);
+                                                                                            if(lastchar.equals(":")){
+                                                                                                key = key.substring(0, key.length()-1).trim();
+                                                                                            }
+
+                                                                                            r.addProperty(key, value);
+                                                                                        }
+                                                                                        break;
+                                                                                    }
                                                                                     case "works":{
                                                                                         //EXAMPLE --- Works: Cyclic Maintenance Traffic Management: Lane Closure.
                                                                                         r.setDescription(brsection);
@@ -155,26 +189,30 @@ public class TrafficRepo {
                                                                                         properties.addAll(Arrays.asList(brsection.split("\n\n")));
 
                                                                                         //check if any of the properties has only one line, sometimes diversion info is shown as below
-                                                                                        /*
-                                                                                        Diversion Information:
+                                                                                    /*
+                                                                                    Diversion Information:
 
-                                                                                        1.	North St - Charing X EB on - End
-                                                                                        2.	N/A
-                                                                                        3.	M8 EB - Jct 14 EB off - Return Jct 14 WB On - Jct 16 WB Off - Dobbies Loan - Phoenix Rd - St Georges Rd - End
-                                                                                        */
+                                                                                    1.	North St - Charing X EB on - End
+                                                                                    2.	N/A
+                                                                                    3.	M8 EB - Jct 14 EB off - Return Jct 14 WB On - Jct 16 WB Off - Dobbies Loan - Phoenix Rd - St Georges Rd - End
+                                                                                    */
 
                                                                                         int i = 0;
                                                                                         List<String> toRemove = new ArrayList<String>();
                                                                                         for (String property : properties){
+                                                                                            //check if the last char is a newline (trimming ending whitespace before the check). Sometimes this occurs. So handle this edge case
+                                                                                            //EXAMPLE: "take 3rd exit onto Kilbarchan Onslip Northbound - rejoin A737 Northbound, continue.\n "
+                                                                                            //trim() alone strips the newlines so it is sufficient to handle this situation.
+                                                                                            property = property.trim();
                                                                                             if(property.split("\n").length < 2){
                                                                                                 //add the next property along as the value
                                                                                                 //if this is the last property and its empty, assume its a value that's not attached like the example below
-                                                                                                /*
-                                                                                                Diversion Information:
-                                                                                                Div a:Continue to Rbt at Paisley Road West - re join at Jct 23 EB on slip
+                                                                                            /*
+                                                                                            Diversion Information:
+                                                                                            Div a:Continue to Rbt at Paisley Road West - re join at Jct 23 EB on slip
 
-                                                                                                Div b: Continue Helen St - Edmiston Drive - Broomloan Road  - M8 Jct 23 EB on slip
-                                                                                                 */
+                                                                                            Div b: Continue Helen St - Edmiston Drive - Broomloan Road  - M8 Jct 23 EB on slip
+                                                                                             */
 
                                                                                                 if(properties.size()-1 == i){
                                                                                                     String oneBehind = properties.get(i-1);
@@ -197,10 +235,14 @@ public class TrafficRepo {
                                                                                             //each property has its key/value split with a single newline
                                                                                             keyvalues = property.split(":");
                                                                                             key = keyvalues[0].trim();
+
+                                                                                            if(keyvalues.length < 2){
+                                                                                                System.out.println(property);
+                                                                                            }
                                                                                             value = keyvalues[1].trim();
 
-                                                                                            /*the colon ":" could be leftover at the end of the key,
-                                                                                            this strips it away if it exists*/
+                                                                                        /*the colon ":" could be leftover at the end of the key,
+                                                                                        this strips it away if it exists*/
                                                                                             String lastchar = key.substring(key.length() - 1);
                                                                                             if(lastchar.equals(":")){
                                                                                                 key = key.substring(0, key.length()-1).trim();
@@ -216,69 +258,70 @@ public class TrafficRepo {
                                                                                     }
                                                                                 }
                                                                             }
-                                                                            break;
-                                                                        }
-                                                                        case "link": {
-                                                                            r.setLink(xpp.nextText());
-                                                                            break;
-                                                                        }
-                                                                        case "point": {
-                                                                            //split into latlon
-                                                                            String raw = xpp.nextText();
-                                                                            String[] rawSplit = raw.split(" ");
 
-                                                                            Point point = new Point(Double.parseDouble(rawSplit[0]), Double.parseDouble(rawSplit[1]));
-                                                                            r.setLocation(point);
-                                                                            break;
                                                                         }
-                                                                        case "author": {
-                                                                            r.setAuthor(xpp.nextText());
-                                                                            break;
-                                                                        }
-                                                                        case "comments": {
-                                                                            // TODO comments as list
-                                                                            break;
-                                                                        }
+                                                                        break;
+                                                                    }
+                                                                    case "link": {
+                                                                        r.setLink(xpp.nextText());
+                                                                        break;
+                                                                    }
+                                                                    case "point": {
+                                                                        //split into latlon
+                                                                        String raw = xpp.nextText();
+                                                                        String[] rawSplit = raw.split(" ");
+
+                                                                        Point point = new Point(Double.parseDouble(rawSplit[0]), Double.parseDouble(rawSplit[1]));
+                                                                        r.setLocation(point);
+                                                                        break;
+                                                                    }
+                                                                    case "author": {
+                                                                        r.setAuthor(xpp.nextText());
+                                                                        break;
+                                                                    }
+                                                                    case "comments": {
+                                                                        // TODO comments as list
+                                                                        break;
                                                                     }
                                                                 }
-                                                                eventType = xpp.next();
-                                                                eventType = incrementPullParser(eventType, xpp);
                                                             }
-                                                            trafficCache.add(r);
-                                                            // Get the next event
-                                                            break;
+                                                            eventType = xpp.next();
+                                                            eventType = incrementPullParser(eventType, xpp);
                                                         }
+                                                        trafficCache.add(r);
+                                                        // Get the next event
+                                                        break;
                                                     }
                                                 }
-                                                eventType = xpp.next();
-                                                eventType = incrementPullParser(eventType, xpp);
                                             }
-                                            break;
+                                            eventType = xpp.next();
+                                            eventType = incrementPullParser(eventType, xpp);
                                         }
+                                        break;
                                     }
                                 }
-                                eventType = xpp.next();
-                                eventType = incrementPullParser(eventType, xpp);
-                            } // End of while
-                            if (taskListener != null) {
-                                taskListener.onFinished(trafficCache);
                             }
-                        } catch (XmlPullParserException e) {
-                            e.printStackTrace();
-                        } catch (IOException e) {
-                            e.printStackTrace();
+                            eventType = xpp.next();
+                            eventType = incrementPullParser(eventType, xpp);
+                        } // End of while
+                        if (taskListener != null) {
+                            taskListener.onFinished(trafficCache);
                         }
+                    } catch (XmlPullParserException e) {
+                        e.printStackTrace();
+                    } catch (IOException e) {
+                        e.printStackTrace();
                     }
+                }
 
-                    @Override
-                    public void onDownloadProgress(Double progress) {
-                        taskListener.onDownloadProgress(progress);
-                    }
-                };
-                LoaderTask loader = new LoaderTask(t);
+                @Override
+                public void onDownloadProgress(Double progress) {
+                    taskListener.onDownloadProgress(progress);
+                }
+            };
+            LoaderTask loader = new LoaderTask(t);
 
-                loader.execute(strings[0]);
-            }
+            loader.execute(strings[0]);
             return null;
         }
 
