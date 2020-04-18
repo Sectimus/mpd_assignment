@@ -1,20 +1,38 @@
 package org.gcu.me.mpd_assignment.ui.map;
 
+import android.app.DatePickerDialog;
+import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.res.Configuration;
+import android.graphics.Color;
+import android.icu.util.Calendar;
+import android.location.Location;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.DatePicker;
+import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.TimePicker;
 
+import com.google.android.gms.common.api.Status;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.Circle;
+import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.libraries.places.api.model.Place;
+import com.google.android.libraries.places.widget.AutocompleteSupportFragment;
+import com.google.android.libraries.places.widget.listener.PlaceSelectionListener;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import androidx.annotation.NonNull;
@@ -38,7 +56,12 @@ import org.gcu.me.mpd_assignment.ui.loader.LoaderViewModel;
 
 
 import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener {
@@ -52,7 +75,105 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
     //side view
     private Fragment trafficlist;
 
+    //time period selection
     private Class<?> trafficType;
+    private ImageView dateicon;
+    private LocalDateTime startDate;
+    private LocalDateTime endDate;
+
+    //location selection
+    Point chosenLocation;
+    //radius selection
+    EditText txt_radius;
+
+    //map marker hashmap
+    private HashMap<Traffic, Marker> markers;
+
+
+
+    private Calendar c;
+    private Context ctx;
+
+    //info for the reloader
+    private Bundle savedInstanceState;
+    private SupportMapFragment mapFragment;
+    private View root;
+
+    //checks the times of the markers if they overlap with the specified times
+    private void checkMarkers(){
+
+        Integer radius;
+        try{
+            radius = Integer.parseInt(txt_radius.getText().toString());
+        } catch(NumberFormatException e){
+            radius = null;
+        }
+
+        for(Map.Entry<Traffic, Marker> entry : markers.entrySet()) {
+            //TODO not only roadworks
+            Roadworks key = (Roadworks) entry.getKey();
+            Marker marker = entry.getValue();
+
+            boolean show = true;
+
+
+            if(startDate != null && endDate != null) {
+                if ((startDate.isBefore(key.getEnd()) || startDate.isEqual(key.getEnd())) && (endDate.isAfter(key.getStart()) || endDate.isEqual(key.getStart()))) {
+                    show = true;
+                } else {
+                    show = false;
+                }
+            }
+
+            if(chosenLocation != null && radius != null){
+                float[] result = new float[2];
+                Location.distanceBetween(chosenLocation.getLat(), chosenLocation.getLon(), marker.getPosition().latitude, marker.getPosition().longitude, result);
+
+                if(result[0] <=radius){
+                    show = true;
+                } else{
+                    show = false;
+                }
+            }
+
+            marker.setVisible(show);
+        }
+    }
+
+    private void calendarClickHandler(){
+        c = Calendar.getInstance();
+        (new DatePickerDialog(ctx,
+                new DatePickerDialog.OnDateSetListener() {
+                    @Override
+                    public void onDateSet(DatePicker view, int startyear, int startmonth, int startday) {
+                        //now get the start date
+                        (new TimePickerDialog(ctx,
+                            new TimePickerDialog.OnTimeSetListener() {
+                                @Override
+                                public void onTimeSet(TimePicker view, int starthour, int startminute) {
+                                    //set the start date
+                                    startDate = LocalDateTime.parse(startyear+"-"+(startmonth+1)+"-"+startday+" "+starthour+":"+startminute, DateTimeFormatter.ofPattern("yyyy-M-d H:m"));
+                                    //now ask for the end date
+                                    (new DatePickerDialog(ctx,
+                                            new DatePickerDialog.OnDateSetListener() {
+                                                @Override
+                                                public void onDateSet(DatePicker view, int endyear, int endmonth, int endday) {
+                                                    //now get the end date
+                                                    (new TimePickerDialog(ctx,
+                                                            new TimePickerDialog.OnTimeSetListener() {
+                                                                @Override
+                                                                public void onTimeSet(TimePicker view, int endhour, int endminute) {
+                                                                    //set the end date
+                                                                    endDate = LocalDateTime.parse(endyear+"-"+(endmonth+1)+"-"+endday+" "+endhour+":"+endminute, DateTimeFormatter.ofPattern("yyyy-M-d H:m"));
+                                                                }
+                                                            }, LocalDateTime.now().getHour(), LocalDateTime.now().getMinute(), true)).show();
+                                                }
+                                            }, LocalDateTime.now().plusDays(3).getYear(), LocalDateTime.now().plusDays(3).getMonthValue()-1, LocalDateTime.now().plusDays(3).getDayOfMonth())).show();
+                                }
+                            }, LocalDateTime.now().getHour(), LocalDateTime.now().getMinute(), true)).show();
+                    }
+                }, LocalDateTime.now().getYear(), LocalDateTime.now().getMonthValue()-1, LocalDateTime.now().getDayOfMonth())).show();
+    }
 
     //orientation used to change select operation
     private int orientation;
@@ -66,7 +187,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         }
     }
 
-    private void loadifneeded(Bundle savedInstanceState, SupportMapFragment mapFragment, View root, boolean isCallback){
+    private void loadifneeded( boolean isCallback){
         boolean force = false;
 
         //set the traffic to null if the lastTrafficType is different to the current one.
@@ -119,6 +240,17 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         MainActivity activity = (MainActivity) getActivity();
         BottomNavigationView nav = activity.getNavView();
 
+        this.dateicon = root.findViewById(R.id.calendarIcon);
+
+        MapFragment finalMf = mf;
+        this.dateicon.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                calendarClickHandler();
+            }
+        });
+
+
         if (this.orientation == Configuration.ORIENTATION_LANDSCAPE) {
             // code for landscape mode
             //inner fragment creation
@@ -147,20 +279,61 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
     }
 
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        ctx = this.getContext();
+
         this.trafficType = ((MainActivity) getActivity()).getTrafficType();
 
         mapViewModel = ViewModelProviders.of(this).get(MapViewModel.class);
         View root = inflater.inflate(R.layout.fragment_map, container, false);
         SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
 
+        //setup for reloader
+        this.savedInstanceState = savedInstanceState;
+        this.mapFragment = mapFragment;
+        this.root = root;
         ((MainActivity) getActivity()).setActionBarListener(new MainActivity.ActionBarListener() {
             @Override
             public void onFeedChanged() {
-                loadifneeded(savedInstanceState, mapFragment, root, true);
+                loadifneeded(true);
             }
         });
 
-        loadifneeded(savedInstanceState, mapFragment, root, false);
+        loadifneeded(false);
+
+        // Initialize the AutocompleteSupportFragment.
+
+        AutocompleteSupportFragment autocompleteFragment = (AutocompleteSupportFragment) getChildFragmentManager().findFragmentById(R.id.autocomplete_fragment);
+
+        // Specify the types of place data to return.
+        autocompleteFragment.setPlaceFields(Arrays.asList(Place.Field.ID, Place.Field.NAME,Place.Field.LAT_LNG));
+
+        // Set up a PlaceSelectionListener to handle the response.
+        autocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
+            @Override
+            public void onPlaceSelected(Place place) {
+                LatLng test = place.getLatLng();
+                chosenLocation = new Point(test.latitude, test.longitude);
+            }
+
+            @Override
+            public void onError(Status status) {
+                // TODO: Handle the error.
+                Log.i("MyTag", "An error occurred: " + status);
+            }
+        });
+
+        //setup the radius handler
+        txt_radius = root.findViewById(R.id.radius);
+
+        //setup the form submit button click.
+        ImageView btn_submit = root.findViewById(R.id.submitIcon);
+
+        btn_submit.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                checkMarkers();
+            }
+        });
 
         //set the loaded
         return root;
@@ -183,16 +356,22 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+        //setup the marker hashmap
+        markers = new HashMap<>();
 
         for (Traffic t : traffic) {
+            //load only traffic that are in the time selected.
             Point p = (Point) t.getLocation();
             LatLng loc = new LatLng(p.getLat(), p.getLon());
 
             MarkerOptions markeropt = new MarkerOptions().position(loc).title(t.getTitle());
             Marker m = mMap.addMarker(markeropt);
+            //add the marker to the hashmap
+            markers.put(t, m);
             //set the tag as this traffic object to be used on the click
             m.setTag(t);
         }
+
         //set the onclick handler
         mMap.setOnMarkerClickListener(this);
 

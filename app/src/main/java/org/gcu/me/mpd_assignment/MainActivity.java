@@ -4,6 +4,8 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.google.android.libraries.places.api.Places;
+import com.google.android.libraries.places.api.net.PlacesClient;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import org.gcu.me.mpd_assignment.models.Incident;
@@ -77,6 +79,10 @@ public class MainActivity extends AppCompatActivity implements IndexFragment.Lis
         //setup the toolbar
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        //setup the places api
+        Places.initialize(getApplicationContext(), "AIzaSyD9iqNWRFFy4SF-AeMCAxNWNCOGDjoBoT0");
+        PlacesClient placesClient = Places.createClient(this);
 
 
 

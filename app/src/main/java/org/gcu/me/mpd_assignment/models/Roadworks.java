@@ -86,7 +86,7 @@ public class Roadworks extends Traffic{
             }
             return seconds+"  "+type;
         }
-        return "";
+        return "instant";
     }
 
     public String getFormattedStart(){
