@@ -68,14 +68,17 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ListViewHolder
         Traffic t = traffic.get(position);
         holder.title.setText(t.getTitle());
 
-        //redraw the properties
+        //go through and create each property
         holder.properties.removeAllViews();
         for(Map.Entry<String, String> entry : t.getProperties().entrySet()) {
             String key = entry.getKey();
             String value = entry.getValue();
 
-            if(key.toLowerCase().equals("works")){
+            //works / delay info have a special case of description
+            if(key.toLowerCase().equals("works")) {
                 //this is the type of roadwork
+                holder.description.setText(value);
+            } else if(key.toLowerCase().equals("delay information")){
                 holder.description.setText(value);
             } else{
                 TableRow tr = createTableRowFromProps(key, value);
@@ -83,17 +86,35 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ListViewHolder
             }
         }
 
+        //add the start and end times to the properties, these attributes are only shared by the roadworks class and its inheritants
         if(t instanceof Roadworks){
+            Roadworks r = (Roadworks) t;
+            TableRow trStart = (TableRow) context.getLayoutInflater().inflate(R.layout._fragment_list_item_property, null);
+            ((TextView) trStart.findViewById(R.id.key)).setText("Start");
+            ((TextView) trStart.findViewById(R.id.value)).setText(r.getFormattedStart());
+            holder.properties.addView(trStart);
+
+            TableRow trEnd = (TableRow) context.getLayoutInflater().inflate(R.layout._fragment_list_item_property, null);
+            ((TextView) trEnd.findViewById(R.id.key)).setText("End");
+            ((TextView) trEnd.findViewById(R.id.value)).setText(r.getFormattedEnd());
+            holder.properties.addView(trEnd);
+        }
+
+
+        if(t instanceof PlannedRoadworks){
+            //Planned Roadworks
+            PlannedRoadworks pr = (PlannedRoadworks) t;
+
+            holder.imageView.setImageResource(R.drawable.ic_road_time_24dp);
+        } else if(t instanceof Roadworks){
             //Roadworks
             Roadworks r = (Roadworks) t;
 
-//          description+="\nStart: "+r.getFormattedStart()+"\nFinish: "+r.getFormattedEnd()+"\nTime until finished:";
+            holder.description.setText(r.getDelayInformation());
             holder.imageView.setImageResource(R.drawable.ic_roadworks_24dp);
-        } else if(t instanceof PlannedRoadworks){
-            //Planned Roadworks
-            holder.imageView.setImageResource(R.drawable.ic_road_time_24dp);
         } else if(t instanceof Incident){
             //Current Incidents
+            Incident i = (Incident) t;
             holder.imageView.setImageResource(R.drawable.ic_crash_24dp);
         } else{
             //Unknown type

@@ -4,6 +4,8 @@ import android.annotation.SuppressLint;
 import android.os.AsyncTask;
 import android.util.Log;
 
+import org.gcu.me.mpd_assignment.models.Incident;
+import org.gcu.me.mpd_assignment.models.PlannedRoadworks;
 import org.gcu.me.mpd_assignment.models.Roadworks;
 import org.gcu.me.mpd_assignment.models.Traffic;
 import org.gcu.me.mpd_assignment.models.georss.Point;
@@ -103,12 +105,42 @@ public class TrafficRepo {
                                             publishProgress((double)(currentLines/maxLines)*100);
                                         }
 
+                                        //initialize the array as planned roadworks, this will be updated once the initial link has been found.
+                                        Class<?> trafficType = PlannedRoadworks.class;
                                         while (eventType != XmlPullParser.END_DOCUMENT) {
                                             if (eventType == XmlPullParser.START_TAG) {
                                                 switch (xpp.getName().toLowerCase()) {
+                                                    case "link":{
+                                                        String link = xpp.nextText();
+                                                        switch(link){
+                                                            case "https://trafficscotland.org/roadworks/":{
+                                                                trafficType = Roadworks.class;
+                                                                break;
+                                                            }
+                                                            case "https://trafficscotland.org/plannedroadworks/":{
+                                                                trafficType = PlannedRoadworks.class;
+                                                                break;
+                                                            }
+                                                            case "https://trafficscotland.org/currentincidents/":{
+                                                                trafficType = Incident.class;
+                                                                break;
+                                                            }
+                                                        }
+                                                        break;
+                                                    }
                                                     case "item":
                                                     {
-                                                        Roadworks r = new Roadworks();
+                                                        Traffic r;
+                                                        if(trafficType == PlannedRoadworks.class){
+                                                            r = new PlannedRoadworks();
+                                                        } else if(trafficType == Roadworks.class){
+                                                            r = new Roadworks();
+                                                        } else if(trafficType == Incident.class){
+                                                            r = new Incident();
+                                                        } else{
+                                                            //default to planned roadworks
+                                                            r = new PlannedRoadworks();
+                                                        }
                                                         //if it is not the end of this tag
 //                                                        while (!(eventType == XmlPullParser.END_TAG && xpp.getName().toLowerCase().equals("item"))) {
                                                         while (!(eventType == XmlPullParser.END_TAG && xpp.getName().toLowerCase().equals("item"))) {
@@ -142,7 +174,7 @@ public class TrafficRepo {
                                                                                         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEEE, dd MMMM yyyy - HH:mm");
                                                                                         LocalDateTime dt = LocalDateTime.parse(value, formatter);
 
-                                                                                        r.setStart(dt);
+                                                                                        ((Roadworks) r).setStart(dt);
                                                                                         break;
                                                                                     }
                                                                                     case "end date": {
@@ -151,7 +183,7 @@ public class TrafficRepo {
                                                                                         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEEE, dd MMMM yyyy - HH:mm");
                                                                                         LocalDateTime dt = LocalDateTime.parse(value, formatter);
 
-                                                                                        r.setEnd(dt);
+                                                                                        ((Roadworks) r).setEnd(dt);
                                                                                         break;
                                                                                     }
                                                                                     case "type":{
@@ -250,6 +282,10 @@ public class TrafficRepo {
 
                                                                                             r.addProperty(key, value);
                                                                                         }
+                                                                                        break;
+                                                                                    }
+                                                                                    case "delay information":{
+                                                                                        ((Roadworks) r).setDelayInformation(value.trim());
                                                                                         break;
                                                                                     }
                                                                                     default: {

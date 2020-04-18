@@ -14,12 +14,21 @@ public class Roadworks extends Traffic{
     private LocalDateTime start;
     private LocalDateTime end;
     private static final DateTimeFormatter dateformat = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+    private String delayInformation;
 
     public LocalDateTime getStart() {return start;}
     public void setStart(LocalDateTime start) {this.start = start;}
 
     public LocalDateTime getEnd() {return end;}
     public void setEnd(LocalDateTime end) {this.end = end;}
+
+    public String getDelayInformation() {
+        return delayInformation;
+    }
+
+    public void setDelayInformation(String delayInformation) {
+        this.delayInformation = delayInformation;
+    }
 
     private static final String resource = "https://trafficscotland.org/rss/feeds/roadworks.aspx";
 
@@ -96,4 +105,6 @@ public class Roadworks extends Traffic{
     public String getFormattedEnd(){
         return this.end.format(dateformat);
     }
+
+
 }
