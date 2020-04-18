@@ -114,29 +114,28 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
             Roadworks key = (Roadworks) entry.getKey();
             Marker marker = entry.getValue();
 
-            boolean show = true;
-
-
-            if(startDate != null && endDate != null) {
+            boolean requirement1 = true;
+            if(startDate != null && endDate != null && (startDate.isBefore(endDate) || startDate.isEqual(endDate))) {
                 if ((startDate.isBefore(key.getEnd()) || startDate.isEqual(key.getEnd())) && (endDate.isAfter(key.getStart()) || endDate.isEqual(key.getStart()))) {
-                    show = true;
+                    requirement1 = true;
                 } else {
-                    show = false;
+                    requirement1 = false;
                 }
             }
 
+            boolean requirement2 = true;
             if(chosenLocation != null && radius != null){
                 float[] result = new float[2];
                 Location.distanceBetween(chosenLocation.getLat(), chosenLocation.getLon(), marker.getPosition().latitude, marker.getPosition().longitude, result);
 
                 if(result[0] <=radius){
-                    show = true;
+                    requirement2 = true;
                 } else{
-                    show = false;
+                    requirement2 = false;
                 }
             }
 
-            marker.setVisible(show);
+            marker.setVisible(requirement1 && requirement2);
         }
     }
 
