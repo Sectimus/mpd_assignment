@@ -32,8 +32,8 @@ public class MainActivity extends AppCompatActivity implements IndexFragment.Lis
     }
 
     private BottomNavigationView navView;
-    //set initial value to show the planned roadworks
-    private static Class<?> trafficType = PlannedRoadworks.class;
+    //set initial value to show the roadworks
+    private static Class<?> trafficType = Roadworks.class;
 
     public Class<?> getTrafficType(){
         return trafficType;

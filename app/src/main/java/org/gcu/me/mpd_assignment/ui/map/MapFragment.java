@@ -20,6 +20,7 @@ import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.TimePicker;
 
@@ -86,16 +87,17 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
     private LocalDateTime endDate;
 
     //location selection
-    Point chosenLocation;
+    private Point chosenLocation;
     //radius selection
-    EditText txt_radius;
+    private EditText txt_radius;
+    private Integer radius;
+    private LinearLayout lay_dist;
 
     //map marker hashmap
     private HashMap<Traffic, Marker> markers;
     Button viewinmaps;
 
-
-
+    //calendar
     private Calendar c;
     private Context ctx;
 
@@ -107,7 +109,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
     //checks the times of the markers if they overlap with the specified times
     private void checkMarkers(){
 
-        Integer radius;
         try{
             radius = Integer.parseInt(txt_radius.getText().toString());
         } catch(NumberFormatException e){
@@ -212,7 +213,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
             traffic = null;
             force = true;
         }
-        System.out.println("a");
 
         if (traffic == null){ //then get the traffic
             MapFragment finalMf = mf;
@@ -328,6 +328,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
 
         //setup the radius handler
         txt_radius = root.findViewById(R.id.radius);
+        lay_dist = root.findViewById(R.id.lay_dist);
 
         //setup the form submit button click.
         ImageView btn_submit = root.findViewById(R.id.submitIcon);
@@ -418,11 +419,11 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
             recyclerView.getLayoutManager().startSmoothScroll(smoothScroller);
         } else{
             this.hud.setVisibility(View.VISIBLE);
+
+            //place the title
+            this.location.setText(t.getTitle());
             if(t instanceof Roadworks){
                 Roadworks r = (Roadworks) t;
-
-                //place the title
-                this.location.setText(r.getTitle());
 
                 //place the formatted length
                 this.length.setText(r.getDurationAsString());
@@ -443,19 +444,29 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
                 if(seconds > 2628000){ //more than a month
                     this.length.setTextColor(getResources().getColor(R.color.length5,null));
                 }
-            } else if(false){
-
             }
         }
 
-        viewinmaps.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String uri = String.format(Locale.ENGLISH, "geo:%f,%f", ((Point) t.getLocation()).getLat(), ((Point) t.getLocation()).getLon());
-                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(uri));
-                ctx.startActivity(intent);
-            }
-        });
+        //if portrait (so the hud is showing) then setup the onclick for the google maps button
+        if (this.orientation == Configuration.ORIENTATION_PORTRAIT) {
+            viewinmaps.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    String uri = String.format(Locale.ENGLISH, "geo:%f,%f", ((Point) t.getLocation()).getLat(), ((Point) t.getLocation()).getLon());
+                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(uri));
+                    ctx.startActivity(intent);
+                }
+            });
 
+            //hide the distance if there was none provided (As default)
+            if(radius != null){
+                float[] result = new float[2];
+                Location.distanceBetween(chosenLocation.getLat(), chosenLocation.getLon(), ((Point) t.getLocation()).getLat(), ((Point) t.getLocation()).getLon(), result);
+                ((TextView) lay_dist.findViewById(R.id.txt_dist)).setText(Math.round(result[0])+" meters");
+                lay_dist.setVisibility(View.VISIBLE);
+            } else{
+                lay_dist.setVisibility(View.GONE);
+            }
+        }
     }
 }
