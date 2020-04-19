@@ -100,7 +100,6 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ListViewHolder
             holder.properties.addView(trEnd);
         }
 
-
         if(t instanceof PlannedRoadworks){
             //Planned Roadworks
             PlannedRoadworks pr = (PlannedRoadworks) t;
@@ -133,6 +132,11 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ListViewHolder
                 listener.onListItemClicked(t);
             }
         });
+
+        //place n/a on empty descriptions
+        if(holder.description.getText().toString().trim() == ""){
+            holder.description.setText("N/A");
+        }
     }
 
     @Override

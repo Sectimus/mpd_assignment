@@ -97,8 +97,6 @@ public class MainActivity extends AppCompatActivity implements IndexFragment.Lis
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
         NavigationUI.setupWithNavController(navView, navController);
 
-
-       // navView.setVisibility(View.GONE);
     }
 
     public BottomNavigationView getNavView() {

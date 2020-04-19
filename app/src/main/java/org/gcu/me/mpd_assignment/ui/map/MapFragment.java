@@ -3,16 +3,19 @@ package org.gcu.me.mpd_assignment.ui.map;
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.icu.util.Calendar;
 import android.location.Location;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -61,6 +64,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -88,6 +92,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
 
     //map marker hashmap
     private HashMap<Traffic, Marker> markers;
+    Button viewinmaps;
 
 
 
@@ -326,13 +331,15 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
 
         //setup the form submit button click.
         ImageView btn_submit = root.findViewById(R.id.submitIcon);
-
         btn_submit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 checkMarkers();
             }
         });
+
+        //setup the "view in google maps" button
+        viewinmaps = root.findViewById(R.id.viewinmaps);
 
         //set the loaded
         return root;
@@ -440,6 +447,15 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
 
             }
         }
+
+        viewinmaps.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String uri = String.format(Locale.ENGLISH, "geo:%f,%f", ((Point) t.getLocation()).getLat(), ((Point) t.getLocation()).getLon());
+                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(uri));
+                ctx.startActivity(intent);
+            }
+        });
 
     }
 }
