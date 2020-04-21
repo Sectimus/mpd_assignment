@@ -12,10 +12,6 @@ import android.widget.ProgressBar;
 
 import org.gcu.me.mpd_assignment.MainActivity;
 import org.gcu.me.mpd_assignment.R;
-import org.gcu.me.mpd_assignment.models.Incident;
-import org.gcu.me.mpd_assignment.models.PlannedRoadworks;
-import org.gcu.me.mpd_assignment.models.Roadworks;
-import org.gcu.me.mpd_assignment.models.Traffic;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
