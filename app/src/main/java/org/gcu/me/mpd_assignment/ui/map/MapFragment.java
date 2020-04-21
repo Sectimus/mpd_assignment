@@ -108,16 +108,18 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         }
 
         for(Map.Entry<Traffic, Marker> entry : markers.entrySet()) {
-            //TODO not only roadworks
-            Roadworks key = (Roadworks) entry.getKey();
             Marker marker = entry.getValue();
 
             boolean requirement1 = true;
-            if(startDate != null && endDate != null && (startDate.isBefore(endDate) || startDate.isEqual(endDate))) {
-                if ((startDate.isBefore(key.getEnd()) || startDate.isEqual(key.getEnd())) && (endDate.isAfter(key.getStart()) || endDate.isEqual(key.getStart()))) {
-                    requirement1 = true;
-                } else {
-                    requirement1 = false;
+            //cannot use non roadworks with dates
+            if(entry.getKey() instanceof Roadworks){
+                Roadworks key = (Roadworks) entry.getKey();
+                if(startDate != null && endDate != null && (startDate.isBefore(endDate) || startDate.isEqual(endDate))) {
+                    if ((startDate.isBefore(key.getEnd()) || startDate.isEqual(key.getEnd())) && (endDate.isAfter(key.getStart()) || endDate.isEqual(key.getStart()))) {
+                        requirement1 = true;
+                    } else {
+                        requirement1 = false;
+                    }
                 }
             }
 
@@ -305,7 +307,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
 
             @Override
             public void onError(Status status) {
-                // TODO: Handle the error.
                 Log.i("MyTag", "An error occurred: " + status);
             }
         });

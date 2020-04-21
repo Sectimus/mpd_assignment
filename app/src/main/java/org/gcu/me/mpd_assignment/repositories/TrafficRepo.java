@@ -319,7 +319,7 @@ public class TrafficRepo {
                                                                         break;
                                                                     }
                                                                     case "comments": {
-                                                                        // TODO comments as list
+                                                                        //Comments seem to be unused in any dataset
                                                                         break;
                                                                     }
                                                                 }
