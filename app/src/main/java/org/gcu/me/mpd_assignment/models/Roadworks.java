@@ -3,9 +3,6 @@
 
 package org.gcu.me.mpd_assignment.models;
 
-import android.os.Parcel;
-
-import org.gcu.me.mpd_assignment.repositories.TrafficRepo;
 import org.gcu.me.mpd_assignment.repositories.TrafficRepo.BuilderTask;
 
 import java.time.Duration;

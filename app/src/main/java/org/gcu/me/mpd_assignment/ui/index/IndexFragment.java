@@ -13,7 +13,6 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProviders;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import org.gcu.me.mpd_assignment.MainActivity;
@@ -24,9 +23,7 @@ import org.gcu.me.mpd_assignment.ui.index.list.ListAdapter;
 import org.gcu.me.mpd_assignment.ui.index.list.TrafficListFragment;
 import org.gcu.me.mpd_assignment.ui.loader.LoaderFragment;
 import org.gcu.me.mpd_assignment.ui.loader.LoaderViewModel;
-import org.gcu.me.mpd_assignment.ui.map.MapFragment;
 
-import java.util.LinkedList;
 import java.util.List;
 
 public class IndexFragment extends Fragment {

@@ -114,6 +114,7 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ListViewHolder
         } else if(t instanceof Incident){
             //Current Incidents
             Incident i = (Incident) t;
+            holder.description.setText(i.getDescription());
             holder.imageView.setImageResource(R.drawable.ic_crash_24dp);
         } else{
             //Unknown type

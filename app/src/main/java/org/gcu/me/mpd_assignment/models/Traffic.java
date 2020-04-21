@@ -3,17 +3,9 @@
 
 package org.gcu.me.mpd_assignment.models;
 
-import android.os.AsyncTask;
-import android.util.Log;
-
 import org.gcu.me.mpd_assignment.models.georss.Coordinates;
 import org.gcu.me.mpd_assignment.repositories.TrafficRepo;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.URL;
-import java.net.URLConnection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;

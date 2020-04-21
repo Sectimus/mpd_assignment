@@ -8,32 +8,25 @@ import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
-import android.graphics.Color;
 import android.icu.util.Calendar;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.DatePicker;
 import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.TimePicker;
 
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.Circle;
-import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -52,7 +45,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import org.gcu.me.mpd_assignment.MainActivity;
 import org.gcu.me.mpd_assignment.R;
-import org.gcu.me.mpd_assignment.models.PlannedRoadworks;
 import org.gcu.me.mpd_assignment.models.Roadworks;
 import org.gcu.me.mpd_assignment.models.Traffic;
 import org.gcu.me.mpd_assignment.models.georss.Point;
@@ -61,8 +53,6 @@ import org.gcu.me.mpd_assignment.ui.index.list.TrafficListFragment;
 import org.gcu.me.mpd_assignment.ui.loader.LoaderFragment;
 import org.gcu.me.mpd_assignment.ui.loader.LoaderViewModel;
 
-
-import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
@@ -70,7 +60,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener {
     private LoaderFragment loaderFragment;
@@ -151,38 +140,26 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
     private void calendarClickHandler(){
         c = Calendar.getInstance();
         DatePickerDialog startDate_picker = new DatePickerDialog(ctx,
-                new DatePickerDialog.OnDateSetListener() {
-                    @Override
-                    public void onDateSet(DatePicker view, int startyear, int startmonth, int startday) {
-                        //now get the start date
-                        TimePickerDialog startTime_picker = new TimePickerDialog(ctx,
-                            new TimePickerDialog.OnTimeSetListener() {
-                                @Override
-                                public void onTimeSet(TimePicker view, int starthour, int startminute) {
-                                    //set the start date
-                                    startDate = LocalDateTime.parse(startyear+"-"+(startmonth+1)+"-"+startday+" "+starthour+":"+startminute, DateTimeFormatter.ofPattern("yyyy-M-d H:m"));
-                                    //now ask for the end date
-                                    DatePickerDialog endDate_picker = new DatePickerDialog(ctx,
-                                            new DatePickerDialog.OnDateSetListener() {
-                                                @Override
-                                                public void onDateSet(DatePicker view, int endyear, int endmonth, int endday) {
-                                                    //now get the end date
-                                                    TimePickerDialog endTime_picker = new TimePickerDialog(ctx,
-                                                            new TimePickerDialog.OnTimeSetListener() {
-                                                                @Override
-                                                                public void onTimeSet(TimePicker view, int endhour, int endminute) {
-                                                                    //set the end date
-                                                                    endDate = LocalDateTime.parse(endyear+"-"+(endmonth+1)+"-"+endday+" "+endhour+":"+endminute, DateTimeFormatter.ofPattern("yyyy-M-d H:m"));
-                                                                }
-                                                            }, LocalDateTime.now().getHour(), LocalDateTime.now().getMinute(), true);
-                                                    endTime_picker.setTitle("Range end time"); endTime_picker.show();
-                                                }
-                                            }, LocalDateTime.now().plusDays(3).getYear(), LocalDateTime.now().plusDays(3).getMonthValue()-1, LocalDateTime.now().plusDays(3).getDayOfMonth());
-                                    endDate_picker.setTitle("Range end date"); endDate_picker.show();
-                                }
+                (view, startyear, startmonth, startday) -> {
+                    //now get the start date
+                    TimePickerDialog startTime_picker = new TimePickerDialog(ctx,
+                            (view1, starthour, startminute) -> {
+                                //set the start date
+                                startDate = LocalDateTime.parse(startyear+"-"+(startmonth+1)+"-"+startday+" "+starthour+":"+startminute, DateTimeFormatter.ofPattern("yyyy-M-d H:m"));
+                                //now ask for the end date
+                                DatePickerDialog endDate_picker = new DatePickerDialog(ctx,
+                                        (view11, endyear, endmonth, endday) -> {
+                                            //now get the end date
+                                            TimePickerDialog endTime_picker = new TimePickerDialog(ctx,
+                                                    (view111, endhour, endminute) -> {
+                                                        //set the end date
+                                                        endDate = LocalDateTime.parse(endyear+"-"+(endmonth+1)+"-"+endday+" "+endhour+":"+endminute, DateTimeFormatter.ofPattern("yyyy-M-d H:m"));
+                                                    }, LocalDateTime.now().getHour(), LocalDateTime.now().getMinute(), true);
+                                            endTime_picker.setTitle("Range end time"); endTime_picker.show();
+                                        }, LocalDateTime.now().plusDays(3).getYear(), LocalDateTime.now().plusDays(3).getMonthValue()-1, LocalDateTime.now().plusDays(3).getDayOfMonth());
+                                endDate_picker.setTitle("Range end date"); endDate_picker.show();
                             }, LocalDateTime.now().getHour(), LocalDateTime.now().getMinute(), true);
-                        startTime_picker.setTitle("Range start time"); startTime_picker.show();
-                    }
+                    startTime_picker.setTitle("Range start time"); startTime_picker.show();
                 }, LocalDateTime.now().getYear(), LocalDateTime.now().getMonthValue()-1, LocalDateTime.now().getDayOfMonth());
         startDate_picker.setTitle("Range start date"); startDate_picker.show();
     }
