@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-->Amelia Magee | S1828146-->
+
+
 <androidx.appcompat.widget.Toolbar xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -7,5 +10,12 @@
     android:elevation="4dp"
     android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
     app:popupTheme="@style/ThemeOverlay.AppCompat.Light">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Amelia Magee | S1828146"
+        android:layout_gravity="center"
+        android:id="@+id/toolbar_title" />
 
 </androidx.appcompat.widget.Toolbar>

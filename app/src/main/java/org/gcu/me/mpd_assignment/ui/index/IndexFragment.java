@@ -1,3 +1,6 @@
+/*Amelia Magee | S1828146*/
+
+
 package org.gcu.me.mpd_assignment.ui.index;
 
 import android.content.Context;

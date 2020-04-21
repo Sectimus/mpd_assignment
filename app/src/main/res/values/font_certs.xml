@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-->Amelia Magee | S1828146-->
+
+
 <resources>
     <array name="com_google_android_gms_fonts_certs">
         <item>@array/com_google_android_gms_fonts_certs_dev</item>

@@ -1,3 +1,6 @@
+/*Amelia Magee | S1828146*/
+
+
 package org.gcu.me.mpd_assignment.ui.map;
 
 import android.app.DatePickerDialog;
@@ -147,37 +150,41 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
 
     private void calendarClickHandler(){
         c = Calendar.getInstance();
-        (new DatePickerDialog(ctx,
+        DatePickerDialog startDate_picker = new DatePickerDialog(ctx,
                 new DatePickerDialog.OnDateSetListener() {
                     @Override
                     public void onDateSet(DatePicker view, int startyear, int startmonth, int startday) {
                         //now get the start date
-                        (new TimePickerDialog(ctx,
+                        TimePickerDialog startTime_picker = new TimePickerDialog(ctx,
                             new TimePickerDialog.OnTimeSetListener() {
                                 @Override
                                 public void onTimeSet(TimePicker view, int starthour, int startminute) {
                                     //set the start date
                                     startDate = LocalDateTime.parse(startyear+"-"+(startmonth+1)+"-"+startday+" "+starthour+":"+startminute, DateTimeFormatter.ofPattern("yyyy-M-d H:m"));
                                     //now ask for the end date
-                                    (new DatePickerDialog(ctx,
+                                    DatePickerDialog endDate_picker = new DatePickerDialog(ctx,
                                             new DatePickerDialog.OnDateSetListener() {
                                                 @Override
                                                 public void onDateSet(DatePicker view, int endyear, int endmonth, int endday) {
                                                     //now get the end date
-                                                    (new TimePickerDialog(ctx,
+                                                    TimePickerDialog endTime_picker = new TimePickerDialog(ctx,
                                                             new TimePickerDialog.OnTimeSetListener() {
                                                                 @Override
                                                                 public void onTimeSet(TimePicker view, int endhour, int endminute) {
                                                                     //set the end date
                                                                     endDate = LocalDateTime.parse(endyear+"-"+(endmonth+1)+"-"+endday+" "+endhour+":"+endminute, DateTimeFormatter.ofPattern("yyyy-M-d H:m"));
                                                                 }
-                                                            }, LocalDateTime.now().getHour(), LocalDateTime.now().getMinute(), true)).show();
+                                                            }, LocalDateTime.now().getHour(), LocalDateTime.now().getMinute(), true);
+                                                    endTime_picker.setTitle("Range end time"); endTime_picker.show();
                                                 }
-                                            }, LocalDateTime.now().plusDays(3).getYear(), LocalDateTime.now().plusDays(3).getMonthValue()-1, LocalDateTime.now().plusDays(3).getDayOfMonth())).show();
+                                            }, LocalDateTime.now().plusDays(3).getYear(), LocalDateTime.now().plusDays(3).getMonthValue()-1, LocalDateTime.now().plusDays(3).getDayOfMonth());
+                                    endDate_picker.setTitle("Range end date"); endDate_picker.show();
                                 }
-                            }, LocalDateTime.now().getHour(), LocalDateTime.now().getMinute(), true)).show();
+                            }, LocalDateTime.now().getHour(), LocalDateTime.now().getMinute(), true);
+                        startTime_picker.setTitle("Range start time"); startTime_picker.show();
                     }
-                }, LocalDateTime.now().getYear(), LocalDateTime.now().getMonthValue()-1, LocalDateTime.now().getDayOfMonth())).show();
+                }, LocalDateTime.now().getYear(), LocalDateTime.now().getMonthValue()-1, LocalDateTime.now().getDayOfMonth());
+        startDate_picker.setTitle("Range start date"); startDate_picker.show();
     }
 
     //orientation used to change select operation
@@ -425,6 +432,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
             if(t instanceof Roadworks){
                 Roadworks r = (Roadworks) t;
 
+                root.findViewById(R.id.lay_time).setVisibility(View.VISIBLE);
                 //place the formatted length
                 this.length.setText(r.getDurationAsString());
                 //check the length and color appropriately
@@ -444,6 +452,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
                 if(seconds > 2628000){ //more than a month
                     this.length.setTextColor(getResources().getColor(R.color.length5,null));
                 }
+            } else{
+                //no duration for non-roadworks
+                root.findViewById(R.id.lay_time).setVisibility(View.GONE);
             }
         }
 

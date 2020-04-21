@@ -1,3 +1,6 @@
+/*Amelia Magee | S1828146*/
+
+
 package org.gcu.me.mpd_assignment.repositories;
 
 import android.annotation.SuppressLint;
@@ -152,7 +155,10 @@ public class TrafficRepo {
                                                                     }
                                                                     case "description": {
                                                                         String description = xpp.nextText();
-                                                                        //split the text using regex to check for the breaks
+                                                                        /*split the text using regex to check for the breaks, this is a regex i created to not only check for
+                                                                         the typical <br /> that can be seen in the datasets, but also <br/>, <br / >, < br / > etc.
+                                                                         This gives the application some stability should the format change slightly in the data feeds over time
+                                                                         */
                                                                         String[] brsections = description.split("\\<\\s*br\\s*/?\\s*>");
 
                                                                         //get the data from the encoded string using colons
